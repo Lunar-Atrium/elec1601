@@ -152,8 +152,6 @@ int main(int argc, char *argv[]) {
       exist_coordinate = existsCoordinate(table, coordinate.x, coordinate.y, coordinate.angle);
       if (!exist_coordinate) {
 
-        // insert coordinate to hashtable
-        insertCoordinate(table, coordinate.x, coordinate.y, coordinate.angle);
         // insert coordiante to paths
         paths[paths_index++] = coordinate;
         // set paths as red color

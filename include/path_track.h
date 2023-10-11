@@ -1,7 +1,6 @@
 #ifndef PATH_TRACK_H_INCLUDED
 #define PATH_TRACK_H_INCLUDED
 #include <stdlib.h>
-
 typedef struct CurrentCoordinate {
     int x;
     int y;
@@ -20,7 +19,6 @@ typedef struct PathHashTable {
 } PathHashTable;
 
 PathHashTable *createPathHashTable(int size);
-void insertCoordinate(PathHashTable *table, int x, int y, int angle);
 int existsCoordinate(PathHashTable* table, int x, int y, int angle);
 void freeHashTable(PathHashTable* table);
 #endif

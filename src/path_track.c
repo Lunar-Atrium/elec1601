@@ -1,5 +1,7 @@
 #include "path_track.h"
 
+int COORDINATE_OFFSET = 10;
+
 // TODO: draw a graph
 int hash(PathHashTable* table, int x, int y) {
   unsigned int h = 0;
@@ -17,8 +19,24 @@ PathHashTable* createPathHashTable(int size) {
   return newTable;
 }
 
-void insertCoordinate(PathHashTable* table, int x, int y, int angle) {
+int existsCoordinate(PathHashTable* table, int x, int y, int angle) {
   int index = hash(table, x, y);
+  PathTrackNode* currentNode = table->nodes[index];
+  int coordinate_overlap;
+  int angle_overlap;
+  while (currentNode) {
+    coordinate_overlap = currentNode->coord.x <= x + COORDINATE_OFFSET &&
+                         currentNode->coord.x >= x - COORDINATE_OFFSET &&
+                         currentNode->coord.y <= y + COORDINATE_OFFSET &&
+                         currentNode->coord.y >= y - COORDINATE_OFFSET;
+    angle_overlap = (currentNode->coord.angle <= abs(angle - 120) &&
+                     currentNode->coord.angle >= abs(angle - 240));
+    if (coordinate_overlap) {
+      table->coordinatesAccessedCount++;
+      if (table->coordinatesAccessedCount == 1) return 1;  // found
+    }
+    currentNode = currentNode->next;
+  }
   PathTrackNode* newNode = malloc(sizeof(PathTrackNode));
   newNode->coord.x = x;
   newNode->coord.y = y;
@@ -27,20 +45,6 @@ void insertCoordinate(PathHashTable* table, int x, int y, int angle) {
       table
           ->nodes[index];  // table->table[index] == NULL because initialization
   table->nodes[index] = newNode;
-}
-
-int existsCoordinate(PathHashTable* table, int x, int y, int angle) {
-  int index = hash(table, x, y);
-  PathTrackNode* currentNode = table->nodes[index];
-  while (currentNode) {
-    if (currentNode->coord.x == x && currentNode->coord.y == y &&
-        (currentNode->coord.angle <= angle - 150 &&
-         currentNode->coord.angle >= angle - 210)) {
-      table->coordinatesAccessedCount++;
-      if (table->coordinatesAccessedCount >= 5) return 1;  // found
-    }
-    currentNode = currentNode->next;
-  }
   return 0;  // not found
 }
 
