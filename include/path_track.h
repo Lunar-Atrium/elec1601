@@ -5,6 +5,7 @@
 typedef struct CurrentCoordinate {
     int x;
     int y;
+    int angle;
 } CurrentCoordinate;
 
 typedef struct PathTrackNode {
@@ -19,7 +20,7 @@ typedef struct PathHashTable {
 } PathHashTable;
 
 PathHashTable *createPathHashTable(int size);
-void insertCoordinate(PathHashTable *table, int x, int y);
-int existsCoordinate(PathHashTable* table, int x, int y);
+void insertCoordinate(PathHashTable *table, int x, int y, int angle);
+int existsCoordinate(PathHashTable* table, int x, int y, int angle);
 void freeHashTable(PathHashTable* table);
 #endif

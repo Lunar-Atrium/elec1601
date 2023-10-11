@@ -42,11 +42,22 @@ int main(int argc, char *argv[]) {
   PathHashTable *table;
 
   // SETUP MAZE
-  create_wall(&head, (int[2]){200, 480}, (int[2]){640, 0}, (int[2]){300, 0}, 10,
-              0.005);
-  create_wall(&head, (int[2]){300, 480}, (int[2]){640, 100}, (int[2]){400, 0},
-              10, 0.005);
-  updateAllWalls(head, renderer);
+  // create_wall(&head, (int[2]){200, 480}, (int[2]){640, 0}, (int[2]){300, 0}, 10,
+  //             0.005);
+  // create_wall(&head, (int[2]){300, 480}, (int[2]){640, 100}, (int[2]){400, 0},
+  //             10, 0.005);
+  insertAndSetFirstWall(&head, 1,  OVERALL_WINDOW_WIDTH/2, OVERALL_WINDOW_HEIGHT/2, 10, OVERALL_WINDOW_HEIGHT/2);
+  insertAndSetFirstWall(&head, 2,  OVERALL_WINDOW_WIDTH/2-100, OVERALL_WINDOW_HEIGHT/2+100, 10, OVERALL_WINDOW_HEIGHT/2-100);
+  insertAndSetFirstWall(&head, 3,  OVERALL_WINDOW_WIDTH/2-250, OVERALL_WINDOW_HEIGHT/2+100, 150, 10);
+  insertAndSetFirstWall(&head, 4,  OVERALL_WINDOW_WIDTH/2-150, OVERALL_WINDOW_HEIGHT/2, 150, 10);
+  insertAndSetFirstWall(&head, 5,  OVERALL_WINDOW_WIDTH/2-250, OVERALL_WINDOW_HEIGHT/2-200, 10, 300);
+  insertAndSetFirstWall(&head, 6,  OVERALL_WINDOW_WIDTH/2-150, OVERALL_WINDOW_HEIGHT/2-100, 10, 100);
+  insertAndSetFirstWall(&head, 7,  OVERALL_WINDOW_WIDTH/2-250, OVERALL_WINDOW_HEIGHT/2-200, 450, 10);
+  insertAndSetFirstWall(&head, 8,  OVERALL_WINDOW_WIDTH/2-150, OVERALL_WINDOW_HEIGHT/2-100, 250, 10);
+  insertAndSetFirstWall(&head, 9,  OVERALL_WINDOW_WIDTH/2+200, OVERALL_WINDOW_HEIGHT/2-200, 10, 300);
+  insertAndSetFirstWall(&head, 10,  OVERALL_WINDOW_WIDTH/2+100, OVERALL_WINDOW_HEIGHT/2-100, 10, 300);
+  insertAndSetFirstWall(&head, 11,  OVERALL_WINDOW_WIDTH/2+100, OVERALL_WINDOW_HEIGHT/2+200, OVERALL_WINDOW_WIDTH/2-100, 10);
+  insertAndSetFirstWall(&head, 12,  OVERALL_WINDOW_WIDTH/2+200, OVERALL_WINDOW_HEIGHT/2+100, OVERALL_WINDOW_WIDTH/2-100, 10);
 
   // SETUP ROBOT
   setup_robot(&robot);
@@ -137,11 +148,12 @@ int main(int argc, char *argv[]) {
     if (coordinate.x != robot.x + ROBOT_WIDTH / 2 || coordinate.y != robot.y + ROBOT_HEIGHT / 2) {
       coordinate.x = robot.x + ROBOT_WIDTH / 2;
       coordinate.y = robot.y + ROBOT_HEIGHT / 2;
-      exist_coordinate = existsCoordinate(table, coordinate.x, coordinate.y);
+      coordinate.angle = robot.angle;
+      exist_coordinate = existsCoordinate(table, coordinate.x, coordinate.y, coordinate.angle);
       if (!exist_coordinate) {
 
         // insert coordinate to hashtable
-        insertCoordinate(table, coordinate.x, coordinate.y);
+        insertCoordinate(table, coordinate.x, coordinate.y, coordinate.angle);
         // insert coordiante to paths
         paths[paths_index++] = coordinate;
         // set paths as red color
@@ -157,10 +169,9 @@ int main(int argc, char *argv[]) {
         paths_index = 0;
 
       }
-      printf("current coordinates: %d %d if have gone through: %d\n",
-              coordinate.x, coordinate.y, exist_coordinate);
+      printf("current coordinates: %d %d angle %d if have gone through: %d\n",
+              coordinate.x, coordinate.y, coordinate.angle, exist_coordinate);
     }
-
     // render paths
     for (int i = 0; i < paths_index; i++)
           SDL_RenderDrawPoint(renderer, paths[i].x, paths[i].y);
@@ -192,8 +203,4 @@ void create_wall(struct Wall_collection **head, int start_point[2],
     record_pointBeforeCalc[1] = record_pointAfterCalc[1];
     WALL_KEYS++;
   }
-}
-
-void draw_path() {
-  
 }

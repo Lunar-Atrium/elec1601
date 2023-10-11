@@ -416,19 +416,19 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
 
   } else if (turnLeft) {  // turn left (3-1) times
         
-    for (int turnTime_count = 0; turnTime_count < 3; turnTime_count++)
+    for (int turnTime_count = 0; turnTime_count < 5; turnTime_count++)
       robot->direction = LEFT;
     turnLeft = 0;
 
   } else if (turnRight) {  // turn right (3-1) times
     
-    for (int turnTime_count = 0; turnTime_count < 3; turnTime_count++) 
+    for (int turnTime_count = 0; turnTime_count < 5; turnTime_count++) 
       robot->direction = RIGHT;    
     turnRight = 0;
 
   } else if (front_centre_sensor == 0) { // no wall front
     
-    if (robot->currentSpeed < 5)  // speed up first
+    if (robot->currentSpeed < 3)  // speed up first
       robot->direction = UP;              
     else if (left_sensor > right_sensor)  // close to left wall
       robot->direction = OFF_RIGHT;
