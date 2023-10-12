@@ -1,10 +1,12 @@
 #ifndef PATH_TRACK_H_INCLUDED
 #define PATH_TRACK_H_INCLUDED
-#include <stdlib.h>
+#include <robot.h>
+
+#define TABLE_BUFFER 256
+
 typedef struct CurrentCoordinate {
     int x;
     int y;
-    int angle;
 } CurrentCoordinate;
 
 typedef struct PathTrackNode {
@@ -19,6 +21,7 @@ typedef struct PathHashTable {
 } PathHashTable;
 
 PathHashTable *createPathHashTable(int size);
-int existsCoordinate(PathHashTable* table, int x, int y, int angle);
+int existsCoordinate(PathHashTable* table, int x, int y);
 void freeHashTable(PathHashTable* table);
+void drawCoordinates(PathHashTable* table, SDL_Renderer *renderer);
 #endif

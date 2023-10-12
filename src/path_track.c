@@ -1,8 +1,8 @@
 #include "path_track.h"
 
 int COORDINATE_OFFSET = 10;
+int OVERLAP_COUNT = 1;
 
-// TODO: draw a graph
 int hash(PathHashTable* table, int x, int y) {
   unsigned int h = 0;
   h = 31 * h + x;
@@ -19,7 +19,7 @@ PathHashTable* createPathHashTable(int size) {
   return newTable;
 }
 
-int existsCoordinate(PathHashTable* table, int x, int y, int angle) {
+int existsCoordinate(PathHashTable* table, int x, int y) {
   int index = hash(table, x, y);
   PathTrackNode* currentNode = table->nodes[index];
   int coordinate_overlap;
@@ -29,18 +29,15 @@ int existsCoordinate(PathHashTable* table, int x, int y, int angle) {
                          currentNode->coord.x >= x - COORDINATE_OFFSET &&
                          currentNode->coord.y <= y + COORDINATE_OFFSET &&
                          currentNode->coord.y >= y - COORDINATE_OFFSET;
-    angle_overlap = (currentNode->coord.angle <= abs(angle - 120) &&
-                     currentNode->coord.angle >= abs(angle - 240));
     if (coordinate_overlap) {
       table->coordinatesAccessedCount++;
-      if (table->coordinatesAccessedCount == 1) return 1;  // found
+      if (table->coordinatesAccessedCount == OVERLAP_COUNT) return 1;  // found
     }
     currentNode = currentNode->next;
   }
   PathTrackNode* newNode = malloc(sizeof(PathTrackNode));
   newNode->coord.x = x;
   newNode->coord.y = y;
-  newNode->coord.angle = angle;
   newNode->next =
       table
           ->nodes[index];  // table->table[index] == NULL because initialization
@@ -59,4 +56,15 @@ void freeHashTable(PathHashTable* table) {
   }
   free(table->nodes);
   free(table);
+}
+
+void drawCoordinates(PathHashTable* table, SDL_Renderer *renderer) {
+    for (int i = 0; i < table->size; i++) {
+        PathTrackNode* currentNode = table->nodes[i];
+        while (currentNode) {
+          SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+          SDL_RenderDrawPoint(renderer, currentNode->coord.x, currentNode->coord.y);
+          currentNode = currentNode->next;
+        }
+    }
 }

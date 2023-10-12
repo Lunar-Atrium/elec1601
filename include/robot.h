@@ -20,7 +20,7 @@ int checkRobotHitWall(struct Robot * robot, struct Wall * wall);
 int checkRobotHitWalls(struct Robot * robot, struct Wall_collection * head);
 int checkRobotReachedEnd(struct Robot * robot, int x, int y, int width, int height);
 void robotCrash(struct Robot * robot);
-void robotSuccess(struct Robot * robot, int msec);
+int robotSuccess(struct Robot * robot, int sec, int msec);
 
 //Sensor Checking
 int checkRobotSensor(int x, int y, int sensorSensitivityLength, struct Wall * wall) ;

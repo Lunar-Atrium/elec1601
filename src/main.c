@@ -10,14 +10,12 @@
 // track coordinates
 #include "path_track.h"
 
-int WALL_KEYS = 1;
 int DONE = 0;
-int BUFFER = 256;
 
 void my_maze(struct Wall_collection **head);
-void create_wall(struct Wall_collection **head, int start_point[2],
-                 int end_point[2], int critical_point[2], int thick,
-                 double precision);
+int create_wall(struct Wall_collection **head, int current_wall_keys,
+                int start_point[2], int end_point[2], int critical_point[2],
+                int thick, double precision);
 
 int main(int argc, char *argv[]) {
   SDL_Window *window;
@@ -33,46 +31,54 @@ int main(int argc, char *argv[]) {
   struct Robot robot;
   struct Wall_collection *head = NULL;
   int front_centre_sensor, left_sensor, right_sensor = 0;
-  clock_t start_time, end_time;
-  int msec;
-  int crashed = 0;
 
-  // create a hashtable to track the coordinates
-  CurrentCoordinate coordinate;
-  PathHashTable *table;
+  // get real time
+  clock_t start_time, end_time;
+  time_t start_linuxTimestamp, end_linuxTimestamp;
+
+  int crashed = 0;
+  int moveTerminate = 0;
 
   // SETUP MAZE
-  // create_wall(&head, (int[2]){200, 480}, (int[2]){640, 0}, (int[2]){300, 0}, 10,
-  //             0.005);
-  // create_wall(&head, (int[2]){300, 480}, (int[2]){640, 100}, (int[2]){400, 0},
-  //             10, 0.005);
-  insertAndSetFirstWall(&head, 1,  OVERALL_WINDOW_WIDTH/2, OVERALL_WINDOW_HEIGHT/2, 10, OVERALL_WINDOW_HEIGHT/2);
-  insertAndSetFirstWall(&head, 2,  OVERALL_WINDOW_WIDTH/2-100, OVERALL_WINDOW_HEIGHT/2+100, 10, OVERALL_WINDOW_HEIGHT/2-100);
-  insertAndSetFirstWall(&head, 3,  OVERALL_WINDOW_WIDTH/2-250, OVERALL_WINDOW_HEIGHT/2+100, 150, 10);
-  insertAndSetFirstWall(&head, 4,  OVERALL_WINDOW_WIDTH/2-150, OVERALL_WINDOW_HEIGHT/2, 150, 10);
-  insertAndSetFirstWall(&head, 5,  OVERALL_WINDOW_WIDTH/2-250, OVERALL_WINDOW_HEIGHT/2-200, 10, 300);
-  insertAndSetFirstWall(&head, 6,  OVERALL_WINDOW_WIDTH/2-150, OVERALL_WINDOW_HEIGHT/2-100, 10, 100);
-  insertAndSetFirstWall(&head, 7,  OVERALL_WINDOW_WIDTH/2-250, OVERALL_WINDOW_HEIGHT/2-200, 450, 10);
-  insertAndSetFirstWall(&head, 8,  OVERALL_WINDOW_WIDTH/2-150, OVERALL_WINDOW_HEIGHT/2-100, 250, 10);
-  insertAndSetFirstWall(&head, 9,  OVERALL_WINDOW_WIDTH/2+200, OVERALL_WINDOW_HEIGHT/2-200, 10, 300);
-  insertAndSetFirstWall(&head, 10,  OVERALL_WINDOW_WIDTH/2+100, OVERALL_WINDOW_HEIGHT/2-100, 10, 300);
-  insertAndSetFirstWall(&head, 11,  OVERALL_WINDOW_WIDTH/2+100, OVERALL_WINDOW_HEIGHT/2+200, OVERALL_WINDOW_WIDTH/2-100, 10);
-  insertAndSetFirstWall(&head, 12,  OVERALL_WINDOW_WIDTH/2+200, OVERALL_WINDOW_HEIGHT/2+100, OVERALL_WINDOW_WIDTH/2-100, 10);
+  insertAndSetFirstWall(&head, 1, OVERALL_WINDOW_WIDTH / 2,
+                        OVERALL_WINDOW_HEIGHT / 2, 10,
+                        OVERALL_WINDOW_HEIGHT / 2);
+  insertAndSetFirstWall(&head, 2, OVERALL_WINDOW_WIDTH / 2 - 100,
+                        OVERALL_WINDOW_HEIGHT / 2 + 100, 10,
+                        OVERALL_WINDOW_HEIGHT / 2 - 100);
+  insertAndSetFirstWall(&head, 3, OVERALL_WINDOW_WIDTH / 2 - 250,
+                        OVERALL_WINDOW_HEIGHT / 2 + 100, 150, 10);
+  insertAndSetFirstWall(&head, 4, OVERALL_WINDOW_WIDTH / 2 - 150,
+                        OVERALL_WINDOW_HEIGHT / 2, 150, 10);
+  insertAndSetFirstWall(&head, 5, OVERALL_WINDOW_WIDTH / 2 - 250,
+                        OVERALL_WINDOW_HEIGHT / 2 - 200, 10, 300);
+  insertAndSetFirstWall(&head, 6, OVERALL_WINDOW_WIDTH / 2 - 150,
+                        OVERALL_WINDOW_HEIGHT / 2 - 100, 10, 100);
+  insertAndSetFirstWall(&head, 7, OVERALL_WINDOW_WIDTH / 2 - 250,
+                        OVERALL_WINDOW_HEIGHT / 2 - 200, 450, 10);
+  insertAndSetFirstWall(&head, 8, OVERALL_WINDOW_WIDTH / 2 - 150,
+                        OVERALL_WINDOW_HEIGHT / 2 - 100, 250, 10);
+  insertAndSetFirstWall(&head, 9, OVERALL_WINDOW_WIDTH / 2 + 200,
+                        OVERALL_WINDOW_HEIGHT / 2 - 200, 10, 300);
+  insertAndSetFirstWall(&head, 10, OVERALL_WINDOW_WIDTH / 2 + 100,
+                        OVERALL_WINDOW_HEIGHT / 2 - 100, 10, 300);
+  insertAndSetFirstWall(&head, 11, OVERALL_WINDOW_WIDTH / 2 + 100,
+                        OVERALL_WINDOW_HEIGHT / 2 + 200,
+                        OVERALL_WINDOW_WIDTH / 2 - 100, 10);
+  insertAndSetFirstWall(&head, 12, OVERALL_WINDOW_WIDTH / 2 + 200,
+                        OVERALL_WINDOW_HEIGHT / 2 + 100,
+                        OVERALL_WINDOW_WIDTH / 2 - 100, 10);
 
   // SETUP ROBOT
   setup_robot(&robot);
 
-  // record initial coordinate
+  // setup hashtable
+  PathHashTable *table;
+  table = createPathHashTable(TABLE_BUFFER);
+  int exist_coordinate;
+  CurrentCoordinate coordinate;
   coordinate.x = robot.x + ROBOT_WIDTH / 2;
   coordinate.y = robot.y + ROBOT_HEIGHT / 2;
-
-  // setup hashtable
-  table = createPathHashTable(BUFFER);
-  int exist_coordinate;
-
-  // setup path
-  CurrentCoordinate paths[BUFFER];
-  int paths_index = 0;
 
   SDL_Event event;
   while (!DONE) {
@@ -81,33 +87,30 @@ int main(int argc, char *argv[]) {
 
     // Move robot based on user input commands/auto commands
     if (robot.auto_mode == 1)
-      robotAutoMotorMove(&robot, front_centre_sensor, left_sensor,
-                         right_sensor, exist_coordinate);
+      robotAutoMotorMove(&robot, front_centre_sensor, left_sensor, right_sensor,
+                         exist_coordinate);
     robotMotorMove(&robot, crashed);
 
     // Check if robot reaches endpoint. and check sensor values
     if (checkRobotReachedEnd(&robot, OVERALL_WINDOW_WIDTH,
                              OVERALL_WINDOW_HEIGHT / 2 + 100, 10, 100)) {
       end_time = clock();
-      msec = (end_time - start_time) * 1000 / CLOCKS_PER_SEC;
-      robotSuccess(&robot, msec);
+      end_linuxTimestamp = time(NULL);
+      // msec = (end_time - start_time) * 1000 / CLOCKS_PER_SEC;
+      int sec = end_linuxTimestamp - start_linuxTimestamp;
+      int msec = end_time - start_time;
+      moveTerminate = robotSuccess(&robot, sec, msec);
+
     } else if (crashed == 1 || checkRobotHitWalls(&robot, head)) {
       robotCrash(&robot);
       crashed = 1;
-    } else { // Otherwise compute sensor information
+
+    } else {  // Otherwise compute sensor information
       front_centre_sensor = checkRobotSensorFrontCentreAllWalls(&robot, head);
-      // if (front_centre_sensor > 0)
-      //   printf("Getting close on the centre. Score = %d\n",
-      //          front_centre_sensor);
-
       left_sensor = checkRobotSensorLeftAllWalls(&robot, head);
-      // if (left_sensor > 0)
-      //   printf("Getting close on the left. Score = %d\n", left_sensor);
-
       right_sensor = checkRobotSensorRightAllWalls(&robot, head);
-      // if (right_sensor > 0)
-      //   printf("Getting close on the right. Score = %d\n", right_sensor);
     }
+
     robotUpdate(renderer, &robot);
     updateAllWalls(head, renderer);
 
@@ -133,46 +136,38 @@ int main(int argc, char *argv[]) {
       if (state[SDL_SCANCODE_SPACE]) {
         setup_robot(&robot);
         crashed = 0;
-
-        // destory paths
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); 
-        paths_index = 0;
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
       }
       if (state[SDL_SCANCODE_RETURN]) {
         robot.auto_mode = 1;
         start_time = clock();
+        start_linuxTimestamp = time(NULL);
       }
     }
 
     // update coordinate
-    if (coordinate.x != robot.x + ROBOT_WIDTH / 2 || coordinate.y != robot.y + ROBOT_HEIGHT / 2) {
+    if (coordinate.x != robot.x + ROBOT_WIDTH / 2 ||
+        coordinate.y != robot.y + ROBOT_HEIGHT / 2) {
       coordinate.x = robot.x + ROBOT_WIDTH / 2;
       coordinate.y = robot.y + ROBOT_HEIGHT / 2;
-      coordinate.angle = robot.angle;
-      exist_coordinate = existsCoordinate(table, coordinate.x, coordinate.y, coordinate.angle);
+      exist_coordinate = existsCoordinate(table, coordinate.x, coordinate.y);
       if (!exist_coordinate) {
-
-        // insert coordiante to paths
-        paths[paths_index++] = coordinate;
-        // set paths as red color
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); 
-
+        drawCoordinates(table, renderer);
       } else {
-
+        // destroy paths(set paths as background color)
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         // free memory and re-generate hashtable
         freeHashTable(table);
-        table = createPathHashTable(256);
-        // destroy paths(set paths as background color)
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); 
-        paths_index = 0;
-
+        table = createPathHashTable(TABLE_BUFFER);
       }
-      printf("current coordinates: %d %d angle %d if have gone through: %d\n",
-              coordinate.x, coordinate.y, coordinate.angle, exist_coordinate);
+      if (!moveTerminate) {
+        printf(
+            "current coordinates: %3d %3d if have gone through: %d\tsensor "
+            "detect: %d %d %d\n",
+            coordinate.x, coordinate.y, exist_coordinate, left_sensor,
+            front_centre_sensor, right_sensor);
+      }
     }
-    // render paths
-    for (int i = 0; i < paths_index; i++)
-          SDL_RenderDrawPoint(renderer, paths[i].x, paths[i].y);
 
     SDL_RenderPresent(renderer);
     SDL_Delay(120);
@@ -180,12 +175,11 @@ int main(int argc, char *argv[]) {
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
-  printf("DEAD\n");
 }
 
-void create_wall(struct Wall_collection **head, int start_point[2],
-                 int end_point[2], int critical_point[2], int thick,
-                 double precision) {
+int create_wall(struct Wall_collection **head, int current_wall_keys,
+                int start_point[2], int end_point[2], int critical_point[2],
+                int thick, double precision) {
   int record_pointBeforeCalc[2] = {start_point[0], start_point[1]};
   int record_pointAfterCalc[2] = {start_point[0], start_point[1]};
   for (double t = precision; t <= 1; t += precision) {
@@ -195,10 +189,11 @@ void create_wall(struct Wall_collection **head, int start_point[2],
     record_pointAfterCalc[1] = (1 - t) * (1 - t) * start_point[1] +
                                2 * (1 - t) * t * critical_point[1] +
                                t * t * end_point[1];
-    insertAndSetFirstWall(head, WALL_KEYS, record_pointBeforeCalc[0],
+    insertAndSetFirstWall(head, current_wall_keys, record_pointBeforeCalc[0],
                           record_pointBeforeCalc[1], thick, thick);
     record_pointBeforeCalc[0] = record_pointAfterCalc[0];
     record_pointBeforeCalc[1] = record_pointAfterCalc[1];
-    WALL_KEYS++;
+    current_wall_keys++;
   }
+  return ++current_wall_keys;
 }

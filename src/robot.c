@@ -58,15 +58,16 @@ void robotCrash(struct Robot *robot) {
   robot->crashed = 1;
 }
 
-void robotSuccess(struct Robot *robot, int msec) {
+int robotSuccess(struct Robot *robot, int sec, int msec) {
+  robot->direction = DOWN;
   robot->currentSpeed = 0;
   if (!robot->crashed) {
     printf("Success!!!!!\n\n");
-    printf("Time taken %d seconds %d milliseconds \n", msec / 1000,
-           msec % 1000);
+    printf("Time taken %d seconds %d milliseconds \n", sec, msec % 1000);
     printf("Press space to start again\n");
   }
   robot->crashed = 1;
+  return 1;
 }
 
 int checkRobotSensor(int x, int y, int sensorSensitivityLength,
@@ -397,54 +398,80 @@ void robotMotorMove(struct Robot *robot, int crashed) {
   robot->y = (int)y_offset;
 }
 
+int turnLeft = 0;
+int t_count = 0;
+int findwall = 1;
+
 void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
                         int left_sensor, int right_sensor, int paths) {
+  // turn 45 angle left
+  if (turnLeft) {
+    robot->direction = LEFT;
+    t_count++;
 
-  int deadEnd_record = (robot->currentSpeed == 0) && (left_sensor > 0) &&
-               (right_sensor > 0);  // record dead end
-  int frontWall_record = (robot->currentSpeed > 0) &&
-             (front_centre_sensor > 1);
-  int deadEnd = 0;
-  int turnRight = 0;
-  int turnLeft = 0;
-  
-  if (deadEnd) {  // dead end, keep turn left (12-1) times 
-    
-    for (int deadEnd_count = 0; deadEnd_count < 12; deadEnd_count++)
+    if (t_count == 2) {
+      turnLeft = 0;
+      t_count = 0;
+    }
+
+    // find the right wall first
+  } else if (findwall) {
+    if (right_sensor > 0) findwall = 0;
+
+    // turn left let tight sensor close the wall
+    else if (front_centre_sensor > 0)
+      turnLeft = 1;
+
+    else {
+      // speed up first
+      if (robot->currentSpeed < 3)
+        robot->direction = UP;
+
+      else if (left_sensor > 0)
+        robot->direction = RIGHT;
+
+      else
+        robot->direction = OFF_RIGHT;
+    }
+
+    // no front wall
+  } else if (front_centre_sensor == 0) {
+    // speed up first
+    if (robot->currentSpeed < 3) robot->direction = UP;
+
+    // need to slow down to change
+    else if ((right_sensor != 2) && (robot->currentSpeed > 3))
+      robot->direction = DOWN;
+
+    // not close to right wall or very close to left wall
+    else if ((right_sensor == 0) || (left_sensor > 3))
+      robot->direction = RIGHT;
+
+    // very close to right wall
+    else if (right_sensor > 3)
       robot->direction = LEFT;
-    deadEnd = 0;
 
-  } else if (turnLeft) {  // turn left (3-1) times
-        
-    for (int turnTime_count = 0; turnTime_count < 5; turnTime_count++)
-      robot->direction = LEFT;
-    turnLeft = 0;
-
-  } else if (turnRight) {  // turn right (3-1) times
-    
-    for (int turnTime_count = 0; turnTime_count < 5; turnTime_count++) 
-      robot->direction = RIGHT;    
-    turnRight = 0;
-
-  } else if (front_centre_sensor == 0) { // no wall front
-    
-    if (robot->currentSpeed < 3)  // speed up first
-      robot->direction = UP;              
-    else if (left_sensor > right_sensor)  // close to left wall
+    // not close to right wall
+    else if ((right_sensor < 2) || (left_sensor > 0))
       robot->direction = OFF_RIGHT;
-    else if (left_sensor < right_sensor)  // close to right wall
+
+    // not too close to right wall
+    else if (right_sensor > 2)
       robot->direction = OFF_LEFT;
-    
-  } else if (frontWall_record)  { // meet front wall then stop first
-    robot->direction = DOWN;  
-  } else if (deadEnd_record) {  // dead end
-    deadEnd = 1;
-    robot->direction = LEFT;
-  } else if (left_sensor == 0) { // t intersection (turn left) or turn left
-    turnLeft = 1;
-    robot->direction = LEFT;
-  } else if (right_sensor == 0) { // turn right
-    turnRight = 1;
-    robot->direction = RIGHT;
+
+    // straight, speed up!
+    else if (robot->currentSpeed < 5)
+      robot->direction = UP;
+
+    // meet front wall
+  } else if (front_centre_sensor > 0) {
+    // stop first
+    if (robot->currentSpeed > 0)
+      robot->direction = DOWN;
+
+    else {
+      robot->direction = LEFT;
+      turnLeft = 1;
+    }
   }
 }
