@@ -7,27 +7,27 @@ team memebr:
 * Zixin Zhou(PPT)
 * Sean Kim(Video)
 
-## Program Construction
+## Program Construction (contributor: Shaopeng Luan)
 
 For cross-platform and teamwork, we use CMake to contrusct our program thus can run or debugging in any OS high-efficiency.
 
 CMake has a bunch of nice features, such as good supporting for all the C and C++ complier and good integrate with VScode.
 
-## Developing Cooperation
+## Developing Cooperation (contributor: Shaopeng Luan)
 
 We use git to do teamwork. Git is a common used cross-platform distributed version control system and the code is hosted in github.
 
-## Improvement in time record
+## Improvement in time record (contributor: Shaopeng Luan)
 
 the time record porvided by the original code template is not precise enough, I declared the variable and call `time()` from `time.h` to get linux time stamp for right time display.
 
-## Improvement in terminal output
+## Improvement in terminal output (contributor: Shaopeng Luan)
 
 I have improved the terminal output for better information release, it deepends on path track function which can allow us real-time analysis of the robot.
 
 ![terminal_output](docs/terminal_output.png)
 
-## New Feature: Curve Wall
+## New Feature: Curve Wall (contributor: Shaopeng Luan)
 
 the original function to build walls can only be the form of rectangle. I have adopted the Bezier Curve that is avaliable to build any shape of the wall.
 
@@ -41,7 +41,7 @@ int create_wall(struct Wall_collection **head, int current_wall_keys,
 * critical point is used to build curve, when you specify this variable outside the line of formed by the starting and eneding, it will make this curve as close as to the stationary point for the ideal curve.
 * precision, the precision of this curve should be specifyed between 0.001 to 0.01 for reasonable shape, it should be noted that the higher precision you specifed, the more effieciency consumption you need.
 
-## New Feature: Dynamic Wall
+## New Feature: Dynamic Wall (contributor: Shaopeng Luan)
 
 ```c
 void update_dynamic_wall(SDL_Renderer *renderer, struct Wall_collection *head,
@@ -54,7 +54,7 @@ void update_dynamic_wall(SDL_Renderer *renderer, struct Wall_collection *head,
 * the `speed` parameter is lower, the actual speed is faster.
 * It cannot draw multiple walls at the same time that need to innovate.
 
-## New Feature: path track
+## New Feature: path track (contributor: Shaopeng Luan)
 
 ![path_track](docs/path_track.png)
 
@@ -103,3 +103,23 @@ int existsCoordinate(PathHashTable* table, int x, int y);
 ```
 
 It will accept two global variables. COORDIANTE_OFFSET can provide fuzzy matching means when the robot walks a `COORDINATE OFFSET` pixel around the path, it returns 1. `OVERLAP_COUNT` provides when the robot encounters an OVERLAP COUNT of pixels, it returns 1.
+
+## Robot Algorithm (contributor: Liosa Long)
+
+### step 1
+
+![robot_alogrithm_step1](docs/robot_arlogrithm_step1.png)
+
+### step 2
+
+case 1
+
+![robot_alogrithm_step2_case1](docs/robot_arlogrithm_step2_case1.png)
+
+case 2
+
+![robot_alogrithm_step2_case2](docs/robot_arlogrithm_step2_case2.png)
+
+corner sensor
+
+![corner_sensor](docs/corner_sensor.png)
