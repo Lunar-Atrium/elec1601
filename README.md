@@ -56,7 +56,7 @@ void update_dynamic_wall(SDL_Renderer *renderer, struct Wall_collection *head,
 
 ## New Feature: path track (contributor: Shaopeng Luan)
 
-![path_track](docs/path_track.png)
+![path_track](docs/path_track.gif)
 
 I wrote the path tracking function to observe the path of the robot to better optimize the algorithm.
 

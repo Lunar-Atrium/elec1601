@@ -44,34 +44,34 @@ int main(int argc, char *argv[]) {
 
   // SETUP MAZE
   struct Wall_collection *static_walls_head = NULL;
-  // insertAndSetFirstWall(&static_walls_head, 1, OVERALL_WINDOW_WIDTH / 2,
-  //                       OVERALL_WINDOW_HEIGHT / 2, 10,
-  //                       OVERALL_WINDOW_HEIGHT / 2);
-  // insertAndSetFirstWall(&static_walls_head, 2, OVERALL_WINDOW_WIDTH / 2 - 100,
-  //                       OVERALL_WINDOW_HEIGHT / 2 + 100, 10,
-  //                       OVERALL_WINDOW_HEIGHT / 2 - 100);
-  // insertAndSetFirstWall(&static_walls_head, 3, OVERALL_WINDOW_WIDTH / 2 - 250,
-  //                       OVERALL_WINDOW_HEIGHT / 2 + 100, 150, 10);
-  // insertAndSetFirstWall(&static_walls_head, 4, OVERALL_WINDOW_WIDTH / 2 - 150,
-  //                       OVERALL_WINDOW_HEIGHT / 2, 150, 10);
-  // insertAndSetFirstWall(&static_walls_head, 5, OVERALL_WINDOW_WIDTH / 2 - 250,
-  //                       OVERALL_WINDOW_HEIGHT / 2 - 200, 10, 300);
-  // insertAndSetFirstWall(&static_walls_head, 6, OVERALL_WINDOW_WIDTH / 2 - 150,
-  //                       OVERALL_WINDOW_HEIGHT / 2 - 100, 10, 100);
-  // insertAndSetFirstWall(&static_walls_head, 7, OVERALL_WINDOW_WIDTH / 2 - 250,
-  //                       OVERALL_WINDOW_HEIGHT / 2 - 200, 450, 10);
-  // insertAndSetFirstWall(&static_walls_head, 8, OVERALL_WINDOW_WIDTH / 2 - 150,
-  //                       OVERALL_WINDOW_HEIGHT / 2 - 100, 250, 10);
-  // insertAndSetFirstWall(&static_walls_head, 9, OVERALL_WINDOW_WIDTH / 2 + 200,
-  //                       OVERALL_WINDOW_HEIGHT / 2 - 200, 10, 300);
-  // insertAndSetFirstWall(&static_walls_head, 10, OVERALL_WINDOW_WIDTH / 2 + 100,
-  //                       OVERALL_WINDOW_HEIGHT / 2 - 100, 10, 300);
-  // insertAndSetFirstWall(&static_walls_head, 11, OVERALL_WINDOW_WIDTH / 2 + 100,
-  //                       OVERALL_WINDOW_HEIGHT / 2 + 200,
-  //                       OVERALL_WINDOW_WIDTH / 2 - 100, 10);
-  // insertAndSetFirstWall(&static_walls_head, 12, OVERALL_WINDOW_WIDTH / 2 + 200,
-  //                       OVERALL_WINDOW_HEIGHT / 2 + 100,
-  //                      OVERALL_WINDOW_WIDTH / 2 - 100, 10);
+  insertAndSetFirstWall(&static_walls_head, 1, OVERALL_WINDOW_WIDTH / 2,
+                        OVERALL_WINDOW_HEIGHT / 2, 10,
+                        OVERALL_WINDOW_HEIGHT / 2);
+  insertAndSetFirstWall(&static_walls_head, 2, OVERALL_WINDOW_WIDTH / 2 - 100,
+                        OVERALL_WINDOW_HEIGHT / 2 + 100, 10,
+                        OVERALL_WINDOW_HEIGHT / 2 - 100);
+  insertAndSetFirstWall(&static_walls_head, 3, OVERALL_WINDOW_WIDTH / 2 - 250,
+                        OVERALL_WINDOW_HEIGHT / 2 + 100, 150, 10);
+  insertAndSetFirstWall(&static_walls_head, 4, OVERALL_WINDOW_WIDTH / 2 - 150,
+                        OVERALL_WINDOW_HEIGHT / 2, 150, 10);
+  insertAndSetFirstWall(&static_walls_head, 5, OVERALL_WINDOW_WIDTH / 2 - 250,
+                        OVERALL_WINDOW_HEIGHT / 2 - 200, 10, 300);
+  insertAndSetFirstWall(&static_walls_head, 6, OVERALL_WINDOW_WIDTH / 2 - 150,
+                        OVERALL_WINDOW_HEIGHT / 2 - 100, 10, 100);
+  insertAndSetFirstWall(&static_walls_head, 7, OVERALL_WINDOW_WIDTH / 2 - 250,
+                        OVERALL_WINDOW_HEIGHT / 2 - 200, 450, 10);
+  insertAndSetFirstWall(&static_walls_head, 8, OVERALL_WINDOW_WIDTH / 2 - 150,
+                        OVERALL_WINDOW_HEIGHT / 2 - 100, 250, 10);
+  insertAndSetFirstWall(&static_walls_head, 9, OVERALL_WINDOW_WIDTH / 2 + 200,
+                        OVERALL_WINDOW_HEIGHT / 2 - 200, 10, 300);
+  insertAndSetFirstWall(&static_walls_head, 10, OVERALL_WINDOW_WIDTH / 2 + 100,
+                        OVERALL_WINDOW_HEIGHT / 2 - 100, 10, 300);
+  insertAndSetFirstWall(&static_walls_head, 11, OVERALL_WINDOW_WIDTH / 2 + 100,
+                        OVERALL_WINDOW_HEIGHT / 2 + 200,
+                        OVERALL_WINDOW_WIDTH / 2 - 100, 10);
+  insertAndSetFirstWall(&static_walls_head, 12, OVERALL_WINDOW_WIDTH / 2 + 200,
+                        OVERALL_WINDOW_HEIGHT / 2 + 100,
+                       OVERALL_WINDOW_WIDTH / 2 - 100, 10);
 
   // draw dynamic wall
   struct Wall_collection *dynamic_walls_head1 = NULL;
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
     }
 
     // update dynamic wall
-    update_dynamic_wall(renderer, dynamic_walls_head1, 1);
+    // update_dynamic_wall(renderer, dynamic_walls_head1, 1);
 
     // render
     SDL_RenderPresent(renderer);
