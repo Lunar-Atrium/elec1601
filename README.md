@@ -37,7 +37,7 @@ int create_wall(struct Wall_collection **head, int current_wall_keys,
 
 ## New Feature: path track
 
-![path_track](.\docs\path_track.png)
+![path_track](docs/path_track.png)
 
 I wrote the path tracking function to observe the path of the robot to better optimize the algorithm.
 
@@ -72,4 +72,4 @@ The hash function can be used to travese the current linked list faster. I use h
 Even though it has been abandoned in the actual alogrithim, I think it still has value. Just beacause I am using hash alorigthm, analyzing it will become easy.
 
 Notice the path in red color and terminal output "if have gone through: "
-![existCoordinate](.\docs\existCoordinate.gif)
+![existCoordinate](docs/existCoordinate.gif)
