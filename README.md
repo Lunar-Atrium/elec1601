@@ -7,15 +7,15 @@ team memebr:
 * Zixin Zhou(PPT)
 * Sean Kim(Video)
 
+## Developing Cooperation
+
+We use git to do teamwork. Git is a common used cross-platform distributed version control system and the code is hosted in github.
+
 ## Program Construction (contributor: Shaopeng Luan)
 
 For cross-platform and teamwork, we use CMake to contrusct our program thus can run or debugging in any OS high-efficiency.
 
 CMake has a bunch of nice features, such as good supporting for all the C and C++ complier and good integrate with VScode.
-
-## Developing Cooperation (contributor: Shaopeng Luan)
-
-We use git to do teamwork. Git is a common used cross-platform distributed version control system and the code is hosted in github.
 
 ## Improvement in time record (contributor: Shaopeng Luan)
 
