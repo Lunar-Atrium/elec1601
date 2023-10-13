@@ -13,9 +13,12 @@ void setup_robot(struct Robot *robot) {
   robot->crashed = 0;
   robot->auto_mode = 0;
   robot->findwall = 1;
+  robot->turnLeft = 0;
+  robot->turnRight = 0;
+  robot->t_count = 0;
+  robot->record = 0;
 
-  printf(
-      "Press arrow keys to move manually, or enter to move automatically\n\n");
+    printf("Press arrow keys to move manually, or enter to move automatically\n\n");
 }
 
 int robot_off_screen(struct Robot *robot) {
@@ -399,22 +402,28 @@ void robotMotorMove(struct Robot *robot, int crashed) {
   robot->y = (int)y_offset;
 }
 
-int turnLeft = 0;
-int t_count = 0;
-
 
 void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
                         int left_sensor, int right_sensor, int paths) {
-  // printf("Findwall: %d\n", robot->findwall);
   
   // turn 45 angle left
-  if (turnLeft) {
+  if (robot->turnLeft) {
     robot->direction = LEFT;
-    t_count++;
+    robot->t_count++;
 
-    if (t_count == 2) {
-      turnLeft = 0;
-      t_count = 0;
+    if (robot->t_count == 2) {
+      robot->turnLeft = 0;
+      robot->t_count = 0;
+    }
+
+    // turn 30 angle right
+  } else if (robot->turnRight) {
+    robot->direction = RIGHT;
+    robot->t_count++;
+
+    if (robot->t_count == 1) {
+      robot->turnRight = 0;
+      robot->t_count = 0;
     }
 
     // find the right wall first
@@ -423,11 +432,16 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
 
     // turn left let tight sensor close the wall
     else if (front_centre_sensor > 0)
-      turnLeft = 1;
+      if (robot->currentSpeed > 0){
+        robot->direction = DOWN;
+      }
+      else{
+        robot->turnLeft = 1;
+      }
 
     else {
       // speed up first
-      if (robot->currentSpeed < 3)
+      if (robot->currentSpeed < 4)
         robot->direction = UP;
 
       else if (left_sensor > 0)
@@ -440,41 +454,69 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
     // no front wall
   } else if (front_centre_sensor == 0) {
     // speed up first
-    if (robot->currentSpeed < 3) robot->direction = UP;
+    if (robot->currentSpeed < 3){
+      robot->record = 0;
+      robot->direction = UP;
+    } 
 
     // need to slow down to change
-    else if ((right_sensor != 2) && (robot->currentSpeed > 3))
+    else if ((right_sensor != 3) && (robot->currentSpeed > 3)){
+      robot->record = 0;
       robot->direction = DOWN;
+    }
+
+    //need to turn tight
+    else if (right_sensor == 0){
+      robot->record = 0;
+      robot->direction = RIGHT;
+      robot->turnRight = 1;
+    }
 
     // not close to right wall or very close to left wall
-    else if ((right_sensor == 0) || (left_sensor > 3))
+    else if (left_sensor > 2){
+      robot->record = 0;
       robot->direction = RIGHT;
-
+    }
+    
     // very close to right wall
-    else if (right_sensor > 3)
+    else if (right_sensor > 3){
+      robot->record = 0;
       robot->direction = LEFT;
-
+    }
+      
     // not close to right wall
-    else if ((right_sensor < 2) || (left_sensor > 0))
+    else if ((right_sensor < 3) || (left_sensor > 0)){
+      robot->record = 0;
       robot->direction = OFF_RIGHT;
-
-    // not too close to right wall
-    else if (right_sensor > 2)
-      robot->direction = OFF_LEFT;
-
+    }
+  
     // straight, speed up!
-    else if (robot->currentSpeed < 5)
+    else if ((robot->currentSpeed < 5) && (robot->record >= 10)){
       robot->direction = UP;
+    }
+
+    // straight, speed up up!
+    else if ((robot->currentSpeed < 6) && (robot->record >= 25)){
+      robot->direction = UP;
+    }
+
+    //record if the path is straight
+    else{
+      robot->record++;
+    }   
 
     // meet front wall
   } else if (front_centre_sensor > 0) {
+
+    robot->record = 0;
+
     // stop first
     if (robot->currentSpeed > 0)
       robot->direction = DOWN;
 
     else {
       robot->direction = LEFT;
-      turnLeft = 1;
+      robot->turnLeft = 1;
     }
   }
 }
