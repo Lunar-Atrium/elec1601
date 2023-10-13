@@ -4,17 +4,14 @@ int COORDINATE_OFFSET = 10;
 int OVERLAP_COUNT = 1;
 
 int hash(PathHashTable* table, int x, int y) {
-  unsigned int h = 0;
-  h = 31 * h + x;
-  h = 31 * h + y;
-  return h % table->size;
+  return (31 *  (unsigned int)x + y) % table->size;
 }
 
 PathHashTable* createPathHashTable(int size) {
   PathHashTable* newTable = (PathHashTable*)malloc(sizeof(PathHashTable));
   newTable->size = size;
   newTable->coordinatesAccessedCount = 0;
-  newTable->nodes = malloc(sizeof(PathTrackNode*) * size);
+  newTable->nodes = (PathTrackNode**)malloc(sizeof(PathTrackNode*) * size);
   for (int i = 0; i < size; i++) newTable->nodes[i] = NULL;  // initialization
   return newTable;
 }
