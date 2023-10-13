@@ -43,6 +43,8 @@ struct Robot {
     int crashed;
     int auto_mode;
     int findwall;
+    int turnLeft, turnRight, t_count;
+    int record;
 };
 
 #endif // STRUCTURES_H_INCLUDED
