@@ -405,24 +405,15 @@ void robotMotorMove(struct Robot *robot, int crashed) {
 
 void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
                         int left_sensor, int right_sensor, int paths) {
+  // printf("Record: %d\n", robot->record);
   
-  // turn 45 angle left
+  // turn 45 angle left a time
   if (robot->turnLeft) {
     robot->direction = LEFT;
     robot->t_count++;
 
     if (robot->t_count == 2) {
-      robot->turnLeft = 0;
-      robot->t_count = 0;
-    }
-
-    // turn 30 angle right
-  } else if (robot->turnRight) {
-    robot->direction = RIGHT;
-    robot->t_count++;
-
-    if (robot->t_count == 1) {
-      robot->turnRight = 0;
+      robot->turnLeft -= 1;
       robot->t_count = 0;
     }
 
@@ -430,13 +421,14 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
   } else if (robot->findwall) {
     if (right_sensor > 0) robot->findwall = 0;
 
-    // turn left let tight sensor close the wall
+    // turn left 90 degree to let right sensor detect the wall
     else if (front_centre_sensor > 0)
       if (robot->currentSpeed > 0){
         robot->direction = DOWN;
       }
       else{
-        robot->turnLeft = 1;
+        robot->direction = LEFT;
+        robot->turnLeft = 2;
       }
 
     else {
@@ -460,7 +452,7 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
     } 
 
     // need to slow down to change
-    else if ((right_sensor != 3) && (robot->currentSpeed > 3)){
+    else if ((left_sensor > 0) && (robot->currentSpeed > 3)){
       robot->record = 0;
       robot->direction = DOWN;
     }
@@ -469,11 +461,10 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
     else if (right_sensor == 0){
       robot->record = 0;
       robot->direction = RIGHT;
-      robot->turnRight = 1;
     }
 
-    // not close to right wall or very close to left wall
-    else if (left_sensor > 2){
+    // very close to left wall
+    else if (left_sensor > 3){
       robot->record = 0;
       robot->direction = RIGHT;
     }
@@ -485,22 +476,22 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
     }
       
     // not close to right wall
-    else if ((right_sensor < 3) || (left_sensor > 0)){
+    else if ((right_sensor < 2) || (left_sensor > 0)){
       robot->record = 0;
       robot->direction = OFF_RIGHT;
     }
   
     // straight, speed up!
-    else if ((robot->currentSpeed < 5) && (robot->record >= 10)){
+    else if ((robot->currentSpeed < 5) && (robot->record >= 8)){
       robot->direction = UP;
     }
 
     // straight, speed up up!
-    else if ((robot->currentSpeed < 6) && (robot->record >= 25)){
+    else if ((robot->currentSpeed < 6) && (robot->record >= 15)){
       robot->direction = UP;
     }
 
-    //record if the path is straight
+    //record if the path is broad enough to speed up
     else{
       robot->record++;
     }   
@@ -514,7 +505,13 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
     if (robot->currentSpeed > 0)
       robot->direction = DOWN;
 
-    else {
+    //turn right if no right wall
+    else if (right_sensor == 0){
+      robot->direction = RIGHT;
+    }
+
+    //turn left
+    else{
       robot->direction = LEFT;
       robot->turnLeft = 1;
     }
