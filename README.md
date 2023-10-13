@@ -78,11 +78,8 @@ typedef struct PathTrackNode {
 The hash function can be used to travese the current linked list faster. I use hash to replace the index of arrays not only for tracking paths, but also for faster analiysis for known paths.
 
  ```c
- int hash(PathHashTable* table, int x, int y) {
-  unsigned int h = 0;
-  h = 31 * h + x;
-  h = 31 * h + y;
-  return h % table->size;
+int hash(PathHashTable* table, int x, int y) {
+  return (31 *  (unsigned int)x + y) % table->size;
 }
  ```
 
