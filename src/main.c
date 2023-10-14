@@ -63,8 +63,8 @@ int main(int argc, char *argv[]) {
     robotMotorMove(&robot, crashed);
 
     // Check if robot reaches endpoint. and check sensor values
-    if (checkRobotReachedEnd(&robot, OVERALL_WINDOW_WIDTH,
-                             OVERALL_WINDOW_HEIGHT / 2 + 100, 10, 100)) {
+    if (checkRobotReachedEnd(&robot, OVERALL_WINDOW_WIDTH - 20,
+                             OVERALL_WINDOW_HEIGHT / 2 - 190, 10, 100)) {
       end_time = clock();
       end_linuxTimestamp = time(NULL);
       // msec = (end_time - start_time) * 1000 / CLOCKS_PER_SEC;
@@ -77,15 +77,15 @@ int main(int argc, char *argv[]) {
       crashed = 1;
 
     } else {  // Otherwise compute sensor information
-      front_centre_sensor =
-          checkRobotSensorFrontCentreAllWalls(&robot, walls);
+      front_centre_sensor = checkRobotSensorFrontCentreAllWalls(&robot, walls);
       left_sensor = checkRobotSensorLeftAllWalls(&robot, walls);
       right_sensor = checkRobotSensorRightAllWalls(&robot, walls);
     }
     free_walls(walls);
     robotUpdate(renderer, &robot);
     updateAllWalls(static_wall_head, renderer);
-    struct Wall_collection *drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 30, 0);
+    struct Wall_collection *drownWall =
+        dynamicWallUpdate(renderer, dynamic_wall_head, 50, 0);
     walls = merge_walls(static_wall_head, drownWall);
 
     // Check for user input

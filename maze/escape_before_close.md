@@ -1,6 +1,7 @@
 # ESCAPE BEFORE CLOSE
 
 * base on complex maze
+
 ```c
 // start：
     robot->x =  OVERALL_WINDOW_WIDTH/2 - 100;
