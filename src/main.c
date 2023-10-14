@@ -56,9 +56,19 @@ int main(int argc, char *argv[]) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
+    // update
+    robotUpdate(renderer, &robot);
+    free_walls(walls);
+    updateAllWalls(static_wall_head, renderer);
+    struct Wall_collection *drownWall = NULL;
+    if (robot.auto_mode == 1) 
+      drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 50, 0);
+    walls = merge_walls(static_wall_head, drownWall);
+
     // Move robot based on user input commands/auto commands
     if (robot.auto_mode == 1)
-      robotAutoMotorMove(&robot, front_centre_sensor, left_sensor, right_sensor);
+      robotAutoMotorMove(&robot, front_centre_sensor, left_sensor,
+                         right_sensor);
     robotMotorMove(&robot, crashed);
 
     // Check if robot reaches endpoint. and check sensor values
@@ -80,12 +90,6 @@ int main(int argc, char *argv[]) {
       left_sensor = checkRobotSensorLeftAllWalls(&robot, walls);
       right_sensor = checkRobotSensorRightAllWalls(&robot, walls);
     }
-    free_walls(walls);
-    robotUpdate(renderer, &robot);
-    updateAllWalls(static_wall_head, renderer);
-    struct Wall_collection *drownWall =
-        dynamicWallUpdate(renderer, dynamic_wall_head, 50, 0);
-    walls = merge_walls(static_wall_head, drownWall);
 
     // Check for user input
     SDL_RenderPresent(renderer);
