@@ -107,5 +107,5 @@ It will accept two global variables. COORDIANTE_OFFSET can provide fuzzy matchin
 
 ## Robot Algorithm (contributor: Liosa Long)
 
-TODO
+Private so far ;)
 
