@@ -58,8 +58,7 @@ int main(int argc, char *argv[]) {
 
     // Move robot based on user input commands/auto commands
     if (robot.auto_mode == 1)
-      robotAutoMotorMove(&robot, front_centre_sensor, left_sensor, right_sensor,
-                         exist_coordinate);
+      robotAutoMotorMove(&robot, front_centre_sensor, left_sensor, right_sensor);
     robotMotorMove(&robot, crashed);
 
     // Check if robot reaches endpoint. and check sensor values

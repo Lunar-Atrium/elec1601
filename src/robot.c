@@ -404,7 +404,7 @@ void robotMotorMove(struct Robot *robot, int crashed) {
 
 
 void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
-                        int left_sensor, int right_sensor, int paths) {
+                        int left_sensor, int right_sensor) {
   
   // turn 45 angle left a time
   if (robot->turnLeft) {
