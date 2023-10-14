@@ -57,13 +57,23 @@ int main(int argc, char *argv[]) {
     SDL_RenderClear(renderer);
 
     // update
+    struct Wall_collection *drownWall = NULL;
+    
     robotUpdate(renderer, &robot);
     free_walls(walls);
     updateAllWalls(static_wall_head, renderer);
-    struct Wall_collection *drownWall = NULL;
+    
     if (robot.auto_mode == 1) 
-      drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 60, 0);
+      drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 30, 0);
     walls = merge_walls(static_wall_head, drownWall);
+    
+    if (!exist_coordinate) {
+      drawCoordinates(table, renderer);
+    } else {
+      // free memory and re-generate hashtable
+      freeHashTable(table);
+      table = createPathHashTable(TABLE_BUFFER);
+    }
 
     // Move robot based on user input commands/auto commands
     if (robot.auto_mode == 1)
@@ -138,13 +148,6 @@ int main(int argc, char *argv[]) {
             "detect: %d %d %d\n",
             coordinate.x, coordinate.y, exist_coordinate, left_sensor,
             front_centre_sensor, right_sensor);
-    }
-    if (!exist_coordinate) {
-      drawCoordinates(table, renderer);
-    } else {
-      // free memory and re-generate hashtable
-      freeHashTable(table);
-      table = createPathHashTable(TABLE_BUFFER);
     }
 
     // render
