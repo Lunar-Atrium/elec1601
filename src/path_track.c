@@ -1,7 +1,7 @@
 #include "path_track.h"
 
-int COORDINATE_OFFSET = 10;
-int OVERLAP_COUNT = 1;
+int COORDINATE_OFFSET = 1;
+int OVERLAP_COUNT = 2;
 
 int hash(PathHashTable* table, int x, int y) {
   return (31 *  (unsigned int)x + y) % table->size;
@@ -65,3 +65,4 @@ void drawCoordinates(PathHashTable* table, SDL_Renderer *renderer) {
         }
     }
 }
+

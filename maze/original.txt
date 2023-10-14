@@ -1,4 +1,4 @@
-//orignal maze
+orignal maze
 insertAndSetFirstWall(&head, 1,  OVERALL_WINDOW_WIDTH/2, OVERALL_WINDOW_HEIGHT/2, 10, OVERALL_WINDOW_HEIGHT/2);
 insertAndSetFirstWall(&head, 2,  OVERALL_WINDOW_WIDTH/2-100, OVERALL_WINDOW_HEIGHT/2+100, 10, OVERALL_WINDOW_HEIGHT/2-100);
 insertAndSetFirstWall(&head, 3,  OVERALL_WINDOW_WIDTH/2-250, OVERALL_WINDOW_HEIGHT/2+100, 150, 10);
@@ -17,7 +17,7 @@ insertAndSetFirstWall(&head, 12,  OVERALL_WINDOW_WIDTH/2+200, OVERALL_WINDOW_HEI
   robot->true_x = OVERALL_WINDOW_WIDTH / 2 - 50;
   robot->true_y = OVERALL_WINDOW_HEIGHT - 50;
 
-//my first maze
+my first maze
 insertAndSetFirstWall(&head, 1,  0, OVERALL_WINDOW_HEIGHT - 10, 450, 10);
 insertAndSetFirstWall(&head, 2,  0, OVERALL_WINDOW_HEIGHT - 110, 340, 10);
 insertAndSetFirstWall(&head, 3,  0, OVERALL_WINDOW_HEIGHT - 410, 230, 10);

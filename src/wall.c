@@ -1,52 +1,53 @@
 #include "wall.h"
 
-void wallSetPosition(struct Wall * wall, int x, int y, int width, int height) {
-    wall->x = x;
-    wall->y = y;
-    wall->width = width;
-    wall->height = height;
+void wallSetPosition(struct Wall *wall, int x, int y, int width, int height) {
+  wall->x = x;
+  wall->y = y;
+  wall->width = width;
+  wall->height = height;
 }
 
-void wallUpdate(SDL_Renderer * renderer, struct Wall * wall){
-    SDL_Rect rect = {wall->x, wall->y, wall->width, wall->height};
-    SDL_SetRenderDrawColor(renderer, 111, 0, 255, 255);
-    SDL_RenderFillRect(renderer, &rect);
-    SDL_RenderDrawRect(renderer, &rect);
+void wallUpdate(SDL_Renderer *renderer, struct Wall *wall) {
+  SDL_Rect rect = {wall->x, wall->y, wall->width, wall->height};
+  SDL_SetRenderDrawColor(renderer, 111, 0, 255, 255);
+  SDL_RenderFillRect(renderer, &rect);
+  SDL_RenderDrawRect(renderer, &rect);
 }
 
-//insert link at the first location
-void insertFirstWall(struct Wall_collection ** head, int key, struct Wall * wall) {
-   //create a link
-   struct Wall_collection *link = (struct Wall_collection*) malloc(sizeof(struct Wall_collection));
+// insert link at the first location
+void insertFirstWall(struct Wall_collection **head, int key,
+                     struct Wall *wall) {
+  // create a link
+  struct Wall_collection *link =
+      (struct Wall_collection *)malloc(sizeof(struct Wall_collection));
 
-   link->key = key;
-   link->wall = *wall;
+  link->key = key;
+  link->wall = *wall;
 
-   //point it to old first node
-   link->next = *head;
+  // point it to old first node
+  link->next = *head;
 
-   //point first to new first node
-   *head = link;
+  // point first to new first node
+  *head = link;
 }
 
-void insertAndSetFirstWall(struct Wall_collection ** head, int key, int x, int y, int width, int height){
-   //create a link
-   struct Wall *wall = (struct Wall*) malloc(sizeof(struct Wall));
-   wallSetPosition(wall, x, y, width, height);
-   insertFirstWall(head, key, wall);
-
+void insertAndSetFirstWall(struct Wall_collection **head, int key, int x, int y,
+                           int width, int height) {
+  // create a link
+  struct Wall *wall = (struct Wall *)malloc(sizeof(struct Wall));
+  wallSetPosition(wall, x, y, width, height);
+  insertFirstWall(head, key, wall);
 }
 
-void updateAllWalls(struct Wall_collection * head, SDL_Renderer * renderer) {
-   struct Wall_collection *ptr = head;
+void updateAllWalls(struct Wall_collection *head, SDL_Renderer *renderer) {
+  struct Wall_collection *ptr = head;
 
-   //start from the beginning
-   while(ptr != NULL) {
-      //printf("(%d)",ptr->key);
-      wallUpdate(renderer, &ptr->wall);
-      ptr = ptr->next;
-   }
-
+  // start from the beginning
+  while (ptr != NULL) {
+    if (ptr->key < 0) ptr = ptr->next;  // for dynamic wall
+    wallUpdate(renderer, &ptr->wall);
+    ptr = ptr->next;
+  }
 }
 
 int create_wall(struct Wall_collection **head, int current_wall_keys,
@@ -67,35 +68,98 @@ int create_wall(struct Wall_collection **head, int current_wall_keys,
     record_pointBeforeCalc[1] = record_pointAfterCalc[1];
     current_wall_keys++;
   }
-  return ++current_wall_keys;
+  return current_wall_keys;
 }
 
-void update_dynamic_wall(SDL_Renderer *renderer, struct Wall_collection *head,
-                         int speed) {
+struct Wall_collection *clone_node(const struct Wall_collection *node) {
+  if (!node) return NULL;
+
+  struct Wall_collection *new_node =
+      (struct Wall_collection *)malloc(sizeof(struct Wall_collection));
+  if (!new_node) {
+    printf("Failed to allocate memory for wall node");
+    exit(EXIT_FAILURE);
+  }
+
+  new_node->key = node->key;
+  new_node->wall.x = node->wall.x;
+  new_node->wall.y = node->wall.y;
+  new_node->wall.width = node->wall.width;
+  new_node->wall.height = node->wall.height;
+  new_node->next = NULL;
+
+  return new_node;
+}
+
+struct Wall_collection *merge_walls(
+    const struct Wall_collection *staticWalls,
+    const struct Wall_collection *dynamicWalls) {
+  struct Wall_collection *mergedHead = NULL, *mergedTail = NULL;
+
+  while (staticWalls) {
+    if (!mergedHead) {
+      mergedHead = clone_node(staticWalls);
+      mergedTail = mergedHead;
+    } else {
+      mergedTail->next = clone_node(staticWalls);
+      mergedTail = mergedTail->next;
+    }
+    staticWalls = staticWalls->next;
+  }
+
+  while (dynamicWalls) {
+    if (!mergedHead) {
+      mergedHead = clone_node(dynamicWalls);
+      mergedTail = mergedHead;
+    } else {
+      mergedTail->next = clone_node(dynamicWalls);
+      mergedTail = mergedTail->next;
+    }
+    dynamicWalls = dynamicWalls->next;
+  }
+  return mergedHead;
+}
+
+struct Wall_collection *dynamicWallUpdate(SDL_Renderer *renderer,
+                                          struct Wall_collection *head,
+                                          int time, int mode) {
+  // initialize
   static int initialize = 0;
   static int frameCounter = 0;
-
-  // initialize
   static struct Wall_collection *walls_headTrack;
+  struct Wall_collection *drawnWallsHead = NULL, *drawnWallsTail = NULL;
+
   if (!initialize) {
     walls_headTrack = head;
     initialize = 1;
   }
 
-  struct Wall_collection *current_wall = head;
-  if (frameCounter % speed == 0) {
-    if (walls_headTrack == NULL) {
-      walls_headTrack = head;
-      frameCounter = 0;
-    }
+  if (frameCounter == time && walls_headTrack->next != NULL) {
     walls_headTrack = walls_headTrack->next;
+    frameCounter = 0;
   }
+
+  // update
+  struct Wall_collection *current_wall = head;
   while (current_wall != NULL && current_wall != walls_headTrack) {
-    SDL_SetRenderDrawColor(renderer, 207, 99, 85, 255);
-    SDL_Rect rect = {(current_wall->wall).x, (current_wall->wall).y,
-                     (current_wall->wall).width, (current_wall->wall).height};
-    SDL_RenderFillRect(renderer, &rect);
+    wallUpdate(renderer, &(current_wall->wall));
+    if (!drawnWallsHead) { // first copy
+      drawnWallsHead = clone_node(current_wall);
+      drawnWallsTail = drawnWallsHead;
+    } else {
+      drawnWallsTail->next = clone_node(current_wall);
+      drawnWallsTail = drawnWallsTail->next;
+    }
     current_wall = current_wall->next;
   }
   frameCounter++;
+  return drawnWallsHead;
+}
+
+void free_walls(struct Wall_collection* head) {
+    while (head) {
+        struct Wall_collection* current_wall = head;
+        head = head->next;
+        free(current_wall);
+    }
 }

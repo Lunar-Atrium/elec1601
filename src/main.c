@@ -10,6 +10,7 @@
 // track coordinates
 #include "path_track.h"
 
+void my_custom_maze(struct Wall_collection **head);
 int DONE = 0;
 
 int main(int argc, char *argv[]) {
@@ -43,43 +44,12 @@ int main(int argc, char *argv[]) {
   coordinate.y = robot.y + ROBOT_HEIGHT / 2;
 
   // SETUP MAZE
-  struct Wall_collection *static_walls_head = NULL;
-  insertAndSetFirstWall(&static_walls_head, 1, OVERALL_WINDOW_WIDTH / 2,
-                        OVERALL_WINDOW_HEIGHT / 2, 10,
-                        OVERALL_WINDOW_HEIGHT / 2);
-  insertAndSetFirstWall(&static_walls_head, 2, OVERALL_WINDOW_WIDTH / 2 - 100,
-                        OVERALL_WINDOW_HEIGHT / 2 + 100, 10,
-                        OVERALL_WINDOW_HEIGHT / 2 - 100);
-  insertAndSetFirstWall(&static_walls_head, 3, OVERALL_WINDOW_WIDTH / 2 - 250,
-                        OVERALL_WINDOW_HEIGHT / 2 + 100, 150, 10);
-  insertAndSetFirstWall(&static_walls_head, 4, OVERALL_WINDOW_WIDTH / 2 - 150,
-                        OVERALL_WINDOW_HEIGHT / 2, 150, 10);
-  insertAndSetFirstWall(&static_walls_head, 5, OVERALL_WINDOW_WIDTH / 2 - 250,
-                        OVERALL_WINDOW_HEIGHT / 2 - 200, 10, 300);
-  insertAndSetFirstWall(&static_walls_head, 6, OVERALL_WINDOW_WIDTH / 2 - 150,
-                        OVERALL_WINDOW_HEIGHT / 2 - 100, 10, 100);
-  insertAndSetFirstWall(&static_walls_head, 7, OVERALL_WINDOW_WIDTH / 2 - 250,
-                        OVERALL_WINDOW_HEIGHT / 2 - 200, 450, 10);
-  insertAndSetFirstWall(&static_walls_head, 8, OVERALL_WINDOW_WIDTH / 2 - 150,
-                        OVERALL_WINDOW_HEIGHT / 2 - 100, 250, 10);
-  insertAndSetFirstWall(&static_walls_head, 9, OVERALL_WINDOW_WIDTH / 2 + 200,
-                        OVERALL_WINDOW_HEIGHT / 2 - 200, 10, 300);
-  insertAndSetFirstWall(&static_walls_head, 10, OVERALL_WINDOW_WIDTH / 2 + 100,
-                        OVERALL_WINDOW_HEIGHT / 2 - 100, 10, 300);
-  insertAndSetFirstWall(&static_walls_head, 11, OVERALL_WINDOW_WIDTH / 2 + 100,
-                        OVERALL_WINDOW_HEIGHT / 2 + 200,
-                        OVERALL_WINDOW_WIDTH / 2 - 100, 10);
-  insertAndSetFirstWall(&static_walls_head, 12, OVERALL_WINDOW_WIDTH / 2 + 200,
-                        OVERALL_WINDOW_HEIGHT / 2 + 100,
-                       OVERALL_WINDOW_WIDTH / 2 - 100, 10);
-
-  // draw dynamic wall
-  // struct Wall_collection *dynamic_walls_head1 = NULL;
-  // create_wall(&dynamic_walls_head1, 13, (int[2]){200, 200}, (int[2]){300, 200},
-  //             (int[2]){250, 250}, 10, 0.01);
-  // struct Wall_collection *dynamic_walls_head2 = NULL;
-  // create_wall(&dynamic_walls_head2, 13, (int[2]){400, 200}, (int[2]){500, 200},
-  //             (int[2]){450, 250}, 10, 0.01);
+  struct Wall_collection *static_wall_head = NULL;
+  struct Wall_collection *dynamic_wall_head = NULL;
+  struct Wall_collection *walls = NULL;
+  my_custom_maze(&static_wall_head);
+  create_wall(&dynamic_wall_head, -1, (int[2]){230, 200}, (int[2]){330, 200},
+              (int[2]){330, 200}, 10, 0.05);
 
   // simulation main loop
   while (!DONE) {
@@ -102,19 +72,21 @@ int main(int argc, char *argv[]) {
       int msec = end_time - start_time;
       moveTerminate = robotSuccess(&robot, sec, msec);
 
-    } else if (crashed == 1 || checkRobotHitWalls(&robot, static_walls_head)) {
+    } else if (crashed == 1 || checkRobotHitWalls(&robot, walls)) {
       robotCrash(&robot);
       crashed = 1;
 
     } else {  // Otherwise compute sensor information
       front_centre_sensor =
-          checkRobotSensorFrontCentreAllWalls(&robot, static_walls_head);
-      left_sensor = checkRobotSensorLeftAllWalls(&robot, static_walls_head);
-      right_sensor = checkRobotSensorRightAllWalls(&robot, static_walls_head);
+          checkRobotSensorFrontCentreAllWalls(&robot, walls);
+      left_sensor = checkRobotSensorLeftAllWalls(&robot, walls);
+      right_sensor = checkRobotSensorRightAllWalls(&robot, walls);
     }
-
+    free_walls(walls);
     robotUpdate(renderer, &robot);
-    updateAllWalls(static_walls_head, renderer);
+    updateAllWalls(static_wall_head, renderer);
+    struct Wall_collection *drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 30, 0);
+    walls = merge_walls(static_wall_head, drownWall);
 
     // Check for user input
     SDL_RenderPresent(renderer);
@@ -138,7 +110,9 @@ int main(int argc, char *argv[]) {
       if (state[SDL_SCANCODE_SPACE]) {
         setup_robot(&robot);
         crashed = 0;
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        // free memory and re-generate hashtable
+        freeHashTable(table);
+        table = createPathHashTable(TABLE_BUFFER);
       }
       if (state[SDL_SCANCODE_RETURN]) {
         robot.auto_mode = 1;
@@ -153,26 +127,20 @@ int main(int argc, char *argv[]) {
       coordinate.x = robot.x + ROBOT_WIDTH / 2;
       coordinate.y = robot.y + ROBOT_HEIGHT / 2;
       exist_coordinate = existsCoordinate(table, coordinate.x, coordinate.y);
-      if (!exist_coordinate) {
-        drawCoordinates(table, renderer);
-      } else {
-        // destroy paths(set paths as background color)
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        // free memory and re-generate hashtable
-        freeHashTable(table);
-        table = createPathHashTable(TABLE_BUFFER);
-      }
-      if (!moveTerminate) {
+      if (!moveTerminate)
         printf(
             "current coordinates: %3d %3d if have gone through: %d\tsensor "
             "detect: %d %d %d\n",
             coordinate.x, coordinate.y, exist_coordinate, left_sensor,
             front_centre_sensor, right_sensor);
-      }
     }
-
-    // update dynamic wall
-    // update_dynamic_wall(renderer, dynamic_walls_head1, 1);
+    if (!exist_coordinate) {
+      drawCoordinates(table, renderer);
+    } else {
+      // free memory and re-generate hashtable
+      freeHashTable(table);
+      table = createPathHashTable(TABLE_BUFFER);
+    }
 
     // render
     SDL_RenderPresent(renderer);
@@ -181,4 +149,128 @@ int main(int argc, char *argv[]) {
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
+}
+
+void my_custom_maze(struct Wall_collection **head) {
+  int wall_keys = 0;
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 50,
+                        OVERALL_WINDOW_HEIGHT / 2 + 200, 10,
+                        OVERALL_WINDOW_HEIGHT / 2 - 200);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 150,
+                        OVERALL_WINDOW_HEIGHT / 2 + 200, 10,
+                        OVERALL_WINDOW_HEIGHT / 2 - 200);
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 200, OVERALL_WINDOW_HEIGHT / 2 + 100},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 50, OVERALL_WINDOW_HEIGHT / 2 + 200},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 200, OVERALL_WINDOW_HEIGHT / 2 + 100},
+      8, 0.005);
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 300, OVERALL_WINDOW_HEIGHT / 2 + 100},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 150, OVERALL_WINDOW_HEIGHT / 2 + 200},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 300, OVERALL_WINDOW_HEIGHT / 2 + 100},
+      8, 0.005);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 200,
+                        OVERALL_WINDOW_HEIGHT / 2 + 50, 10, 50);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 300,
+                        OVERALL_WINDOW_HEIGHT / 2 + 50, 10, 50);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 300,
+                        OVERALL_WINDOW_HEIGHT / 2 - 220, 10, 175);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 230,
+                        OVERALL_WINDOW_HEIGHT / 2 - 160, 10, 25);
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 200, OVERALL_WINDOW_HEIGHT / 2 + 50},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 80, OVERALL_WINDOW_HEIGHT / 2 - 135},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 200, OVERALL_WINDOW_HEIGHT / 2 + 50},
+      8, 0.005);
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 230, OVERALL_WINDOW_HEIGHT / 2 - 45},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 300, OVERALL_WINDOW_HEIGHT / 2 + 50},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 230, OVERALL_WINDOW_HEIGHT / 2 - 45},
+      8, 0.005);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 300,
+                        OVERALL_WINDOW_HEIGHT / 2 - 45, 70, 10);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 230,
+                        OVERALL_WINDOW_HEIGHT / 2 - 135, 150, 10);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 230,
+                        OVERALL_WINDOW_HEIGHT / 2 - 160, 180, 10);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 300,
+                        OVERALL_WINDOW_HEIGHT / 2 - 220, 330, 10);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 30,
+                        OVERALL_WINDOW_HEIGHT / 2 - 220, 10, 60);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 240,
+                        OVERALL_WINDOW_HEIGHT / 2 - 160,
+                        OVERALL_WINDOW_WIDTH / 2 - 240, 10);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 100,
+                        OVERALL_WINDOW_HEIGHT / 2 - 220,
+                        OVERALL_WINDOW_WIDTH / 2 - 100, 10);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 100,
+                        OVERALL_WINDOW_HEIGHT / 2 - 220, 10, 175);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 100,
+                        OVERALL_WINDOW_HEIGHT / 2 - 45, 50, 10);
+  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 240,
+                        OVERALL_WINDOW_HEIGHT / 2 - 135, 70, 10);
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 240, OVERALL_WINDOW_HEIGHT / 2 - 160},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 240, OVERALL_WINDOW_HEIGHT / 2 - 135},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 125, OVERALL_WINDOW_HEIGHT / 2 - 150},
+      10, 0.005);
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 150, OVERALL_WINDOW_HEIGHT / 2 - 45},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 60, OVERALL_WINDOW_HEIGHT / 2 + 95},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 200, OVERALL_WINDOW_HEIGHT / 2 + 50},
+      10, 0.005);
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 10, OVERALL_WINDOW_HEIGHT / 2 + 215},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 310, OVERALL_WINDOW_HEIGHT / 2 - 135},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 310, OVERALL_WINDOW_HEIGHT / 2 + 150},
+      10, 0.005);
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 30, OVERALL_WINDOW_HEIGHT / 2 - 160},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 50, OVERALL_WINDOW_HEIGHT / 2 - 85},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 110, OVERALL_WINDOW_HEIGHT / 2 - 120},
+      8, 0.005);  // c1
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 70, OVERALL_WINDOW_HEIGHT / 2},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 60, OVERALL_WINDOW_HEIGHT / 2 + 95},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 130, OVERALL_WINDOW_HEIGHT / 2 + 50},
+      8, 0.005);  // c3
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 50, OVERALL_WINDOW_HEIGHT / 2 - 85},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 70, OVERALL_WINDOW_HEIGHT / 2},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 20, OVERALL_WINDOW_HEIGHT / 2 - 25},
+      8, 0.005);  // c5
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 50, OVERALL_WINDOW_HEIGHT / 2 - 160},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 40, OVERALL_WINDOW_HEIGHT / 2 - 85},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2, OVERALL_WINDOW_HEIGHT / 2 - 130}, 8,
+      0.005);  // c2
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 20, OVERALL_WINDOW_HEIGHT / 2 + 20},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 60, OVERALL_WINDOW_HEIGHT / 2 + 125},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 30, OVERALL_WINDOW_HEIGHT / 2 + 50},
+      8, 0.005);  // c4
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 40, OVERALL_WINDOW_HEIGHT / 2 - 85},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 20, OVERALL_WINDOW_HEIGHT / 2 + 20},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 130, OVERALL_WINDOW_HEIGHT / 2 - 25},
+      8, 0.005);  // c6
+  wall_keys = create_wall(
+      head, ++wall_keys,
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 60, OVERALL_WINDOW_HEIGHT / 2 + 125},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 10, OVERALL_WINDOW_HEIGHT / 2 + 215},
+      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 100, OVERALL_WINDOW_HEIGHT / 2 + 155},
+      8, 0.005);  // c7
 }

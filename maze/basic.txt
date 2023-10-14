@@ -19,7 +19,7 @@ insertAndSetFirstWall(&head, 18,  OVERALL_WINDOW_WIDTH/2 - 125, OVERALL_WINDOW_H
 insertAndSetFirstWall(&head, 19,  OVERALL_WINDOW_WIDTH/2 + 85, OVERALL_WINDOW_HEIGHT/2-200, 10, 110);
 insertAndSetFirstWall(&head, 20,  OVERALL_WINDOW_WIDTH/2 + 185, OVERALL_WINDOW_HEIGHT/2-100, 10, 110);
 
-起点走
+start
     robot->x =  OVERALL_WINDOW_WIDTH/2 - 100;
     robot->y = OVERALL_WINDOW_HEIGHT - 30;
     robot->true_x = OVERALL_WINDOW_WIDTH / 2 - 100;
@@ -30,7 +30,7 @@ insertAndSetFirstWall(&head, 20,  OVERALL_WINDOW_WIDTH/2 + 185, OVERALL_WINDOW_H
     robot->angle = 0;
 
 
-终点走
+end
     robot->x =  OVERALL_WINDOW_WIDTH - 20;
     robot->y = OVERALL_WINDOW_HEIGHT/2 + 150;
     robot->true_x = OVERALL_WINDOW_WIDTH - 20;
@@ -40,7 +40,7 @@ insertAndSetFirstWall(&head, 20,  OVERALL_WINDOW_WIDTH/2 + 185, OVERALL_WINDOW_H
     robot->direction = 0;
     robot->angle = 270;
 
-镜像：
+mirror：
 insertAndSetFirstWall(&head, 1,  OVERALL_WINDOW_WIDTH/2 + 50, OVERALL_WINDOW_HEIGHT/2 + 50, 10, OVERALL_WINDOW_HEIGHT/2 -50);
 insertAndSetFirstWall(&head, 2,  OVERALL_WINDOW_WIDTH/2 + 150, OVERALL_WINDOW_HEIGHT/2 + 150, 10, OVERALL_WINDOW_HEIGHT/2-150);
 insertAndSetFirstWall(&head, 3,  OVERALL_WINDOW_WIDTH/2 + 150, OVERALL_WINDOW_HEIGHT/2 + 150, 150, 10);
