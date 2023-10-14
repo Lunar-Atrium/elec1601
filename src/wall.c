@@ -122,12 +122,15 @@ struct Wall_collection *merge_walls(
 
 struct Wall_collection *dynamicWallUpdate(SDL_Renderer *renderer,
                                           struct Wall_collection *head,
-                                          int time, int mode) {
+                                          int time, int reset) {
   // initialize
   static int initialize = 0;
   static int frameCounter = 0;
   static struct Wall_collection *walls_headTrack;
   struct Wall_collection *drawnWallsHead = NULL, *drawnWallsTail = NULL;
+
+  if (reset)
+    walls_headTrack = head;
 
   if (!initialize) {
     walls_headTrack = head;

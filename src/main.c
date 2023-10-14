@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     updateAllWalls(static_wall_head, renderer);
     struct Wall_collection *drownWall = NULL;
     if (robot.auto_mode == 1) 
-      drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 50, 0);
+      drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 60, 0);
     walls = merge_walls(static_wall_head, drownWall);
 
     // Move robot based on user input commands/auto commands
@@ -116,6 +116,8 @@ int main(int argc, char *argv[]) {
         // free memory and re-generate hashtable
         freeHashTable(table);
         table = createPathHashTable(TABLE_BUFFER);
+        //re-generate dynamic wall
+        dynamicWallUpdate(renderer, dynamic_wall_head, 60, 1);
       }
       if (state[SDL_SCANCODE_RETURN]) {
         robot.auto_mode = 1;

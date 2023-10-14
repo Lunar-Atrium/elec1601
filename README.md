@@ -7,6 +7,10 @@ team memebr:
 * Zixin Zhou(PPT)
 * Sean Kim(Video)
 
+## ACHIEVEMENT
+
+![final](docs/final.gif)
+
 ## Developing Cooperation
 
 We use git to do teamwork. Git is a common used cross-platform distributed version control system and the code is hosted in github.
@@ -103,20 +107,5 @@ It will accept two global variables. COORDIANTE_OFFSET can provide fuzzy matchin
 
 ## Robot Algorithm (contributor: Liosa Long)
 
-### step 1
+TODO
 
-![robot_alogrithm_step1](docs/robot_arlogrithm_step1.png)
-
-### step 2
-
-case 1
-
-![robot_alogrithm_step2_case1](docs/robot_arlogrithm_step2_case1.png)
-
-case 2
-
-![robot_alogrithm_step2_case2](docs/robot_arlogrithm_step2_case2.png)
-
-corner sensor
-
-![corner_sensor](docs/corner_sensor.png)
