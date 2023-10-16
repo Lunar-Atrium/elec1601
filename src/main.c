@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     updateAllWalls(static_wall_head, renderer);
     
     if (robot.auto_mode == 1) 
-      drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 30, 0);
+      drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 50, 0);
     walls = merge_walls(static_wall_head, drownWall);
     
     if (!exist_coordinate) {
