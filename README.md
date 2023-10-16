@@ -49,13 +49,13 @@ int create_wall(struct Wall_collection **head, int current_wall_keys,
 
 ```c
 void update_dynamic_wall(SDL_Renderer *renderer, struct Wall_collection *head,
-                         int speed， int reset)
+                         int time， int reset)
 ```
 
 ![dynamic_wall](docs/dynamic_wall.gif)
 
 * for building this wall, you need to create a collection of walls in the form of a linked chart provided by the template.
-* the `speed` parameter is lower, the actual speed is faster.
+* the `time` parameter assgined the generate time of one node in the dynamic wall linked list
 * It cannot draw multiple walls at the same time that need to innovate.
 
 ## New Feature: path track (contributor: Shaopeng Luan)
