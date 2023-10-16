@@ -49,7 +49,7 @@ int create_wall(struct Wall_collection **head, int current_wall_keys,
 
 ```c
 void update_dynamic_wall(SDL_Renderer *renderer, struct Wall_collection *head,
-                         int speed)
+                         int speed， int reset)
 ```
 
 ![dynamic_wall](docs/dynamic_wall.gif)
@@ -108,4 +108,3 @@ It will accept two global variables. COORDIANTE_OFFSET can provide fuzzy matchin
 ## Robot Algorithm (contributor: Liosa Long)
 
 Private so far ;)
-

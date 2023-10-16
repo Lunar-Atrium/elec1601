@@ -1,3 +1,5 @@
+/*https://github.com/Lunar-Atrium/elec1601*/
+
 #include "SDL2/SDL.h"
 #include "SDL2/SDL2_gfxPrimitives.h"
 #include "formulas.h"
