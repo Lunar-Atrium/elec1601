@@ -105,6 +105,24 @@ int existsCoordinate(PathHashTable* table, int x, int y);
 
 It will accept two global variables. COORDIANTE_OFFSET can provide fuzzy matching means when the robot walks a `COORDINATE OFFSET` pixel around the path, it returns 1. `OVERLAP_COUNT` provides when the robot encounters an OVERLAP COUNT of pixels, it returns 1.
 
+### how we use this function to improve our algorithm
+
+When we can observe the path, improving our algorithm becomes convenient and simple.
+
+* When we encounter a sharp corner, the path of the robot is as follows:
+
+  ![sharp_corner](docs/sharp_corner.gif)
+
+* When we encounter right and obtuse angles, the path of the robot is as follows:
+
+  ![obtuse_corner](docs/obtuse_corner.gif)
+
+* When we encounter long straights and gentle curves, the path of the robot is as follows:
+
+  ![long_stragiht](docs/long_straights.gif)
+
+It is clear to see that the robot is accelerating.
+
 ## Robot Algorithm (contributor: Liosa Long)
 
 Private so far ;)
