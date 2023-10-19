@@ -125,4 +125,12 @@ It is clear to see that the robot is accelerating.
 
 ## Robot Algorithm (contributor: Liosa Long)
 
-Private so far ;)
+![robot_algorithim_page_1](docs/robot_algorithim/page_1.PNG)
+![robot_algorithim_page_2](docs/robot_algorithim/page_2.PNG)
+![robot_algorithim_page_3](docs/robot_algorithim/page_3.PNG)
+![robot_algorithim_page_4](docs/robot_algorithim/page_4.PNG)
+![robot_algorithim_page_5](docs/robot_algorithim/page_5.PNG)
+![robot_algorithim_page_6](docs/robot_algorithim/page_6.PNG)
+![robot_algorithim_page_7](docs/robot_algorithim/page_7.PNG)
+![robot_algorithim_page_8](docs/robot_algorithim/page_8.PNG)
+![robot_algorithim_page_9](docs/robot_algorithim/page_9.PNG)
