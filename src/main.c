@@ -46,28 +46,16 @@ int main(int argc, char *argv[]) {
   coordinate.y = robot.y + ROBOT_HEIGHT / 2;
 
   // SETUP MAZE
-  struct Wall_collection *static_wall_head = NULL;
-  // struct Wall_collection *dynamic_wall_head = NULL;
   struct Wall_collection *walls = NULL;
   my_custom_maze(&walls);
-  // create_wall(&dynamic_wall_head, -1, (int[2]){230, 200}, (int[2]){330, 200},
-              // (int[2]){330, 200}, 10, 0.05);
 
   // simulation main loop
   while (!DONE) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
-    // update
-    // struct Wall_collection *drownWall = NULL;
-
     robotUpdate(renderer, &robot);
     updateAllWalls(walls, renderer);
-
-    // free_walls(walls);
-    // if (robot.auto_mode == 1)
-    //   drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 50, 0);
-    // walls = merge_walls(static_wall_head, drownWall);
 
     if (!exist_coordinate) {
       drawCoordinates(table, renderer);
@@ -128,7 +116,6 @@ int main(int argc, char *argv[]) {
         freeHashTable(table);
         table = createPathHashTable(TABLE_BUFFER);
         // re-generate dynamic wall
-        // dynamicWallUpdate(renderer, dynamic_wall_head, 60, 1);
       }
       if (state[SDL_SCANCODE_RETURN]) {
         robot.auto_mode = 1;
