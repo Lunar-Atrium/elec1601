@@ -1,14 +1,14 @@
 #include "robot.h"
 
 void setup_robot(struct Robot *robot) {
-  robot->x =  OVERALL_WINDOW_WIDTH/2 - 100;
-  robot->y = OVERALL_WINDOW_HEIGHT - 20;
-  robot->true_x = OVERALL_WINDOW_WIDTH / 2 - 100;
-  robot->true_y = OVERALL_WINDOW_HEIGHT - 20;
+  robot->x = 30;
+  robot->y = 10;
+  robot->true_x = 30;
+  robot->true_y = 10;
   robot->width = ROBOT_WIDTH;
   robot->height = ROBOT_HEIGHT;
   robot->direction = 0;
-  robot->angle = 0;
+  robot->angle = 240;
   robot->currentSpeed = 0;
   robot->crashed = 0;
   robot->auto_mode = 0;
@@ -18,7 +18,8 @@ void setup_robot(struct Robot *robot) {
   robot->t_count = 0;
   robot->record = 0;
 
-    printf("Press arrow keys to move manually, or enter to move automatically\n\n");
+  printf(
+      "Press arrow keys to move manually, or enter to move automatically\n\n");
 }
 
 int robot_off_screen(struct Robot *robot) {
@@ -402,10 +403,8 @@ void robotMotorMove(struct Robot *robot, int crashed) {
   robot->y = (int)y_offset;
 }
 
-
 void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
                         int left_sensor, int right_sensor) {
-  
   // turn 45 angle left a time
   if (robot->turnLeft) {
     robot->direction = LEFT;
@@ -415,7 +414,7 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
       robot->turnLeft -= 1;
       robot->t_count = 0;
     }
-    
+
     // turn 45 angle right a time
   } else if (robot->turnRight) {
     robot->direction = RIGHT;
@@ -425,17 +424,16 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
       robot->turnRight -= 1;
       robot->t_count = 0;
     }
-    
+
     // find the right wall first
   } else if (robot->findwall) {
     if (right_sensor > 0) robot->findwall = 0;
 
     // turn left 90 degree to let right sensor detect the wall
     else if (front_centre_sensor > 0)
-      if (robot->currentSpeed > 0){
+      if (robot->currentSpeed > 0) {
         robot->direction = DOWN;
-      }
-      else{
+      } else {
         robot->direction = LEFT;
         robot->turnLeft = 2;
       }
@@ -455,61 +453,59 @@ void robotAutoMotorMove(struct Robot *robot, int front_centre_sensor,
     // no front wall
   } else if (front_centre_sensor == 0) {
     // speed up first
-    if (robot->currentSpeed < 3){
+    if (robot->currentSpeed < 3) {
       robot->record = 0;
       robot->direction = UP;
-    } 
+    }
 
     // need to slow down to change
-    else if ((left_sensor > 0) && (robot->currentSpeed > 3)){
+    else if ((left_sensor > 0) && (robot->currentSpeed > 3)) {
       robot->record = 0;
       robot->direction = DOWN;
     }
 
     // can't detect right wall or very close to left wall
-    else if ((right_sensor == 0)||(left_sensor > 3)){
+    else if ((right_sensor == 0) || (left_sensor > 3)) {
       robot->record = 0;
       robot->direction = RIGHT;
     }
-    
+
     // very close to right wall
-    else if (right_sensor > 3){
+    else if (right_sensor > 3) {
       robot->record = 0;
       robot->direction = LEFT;
     }
-      
+
     // not close to right wall or detect left wall
-    else if ((right_sensor < 2) || (left_sensor > 0)){
+    else if ((right_sensor < 2) || (left_sensor > 0)) {
       robot->record = 0;
       robot->direction = OFF_RIGHT;
     }
-  
+
     // straight, speed up!
-    else if ((robot->currentSpeed < 5) && (robot->record >= 10)){
+    else if ((robot->currentSpeed < 5) && (robot->record >= 10)) {
       robot->direction = UP;
     }
 
     // straight, speed up up!
-    else if ((robot->currentSpeed < 6) && (robot->record >= 20)){
+    else if ((robot->currentSpeed < 6) && (robot->record >= 20)) {
       robot->direction = UP;
     }
 
-    //record if the path can speed up
-    else{
+    // record if the path can speed up
+    else {
       robot->record++;
-    }   
+    }
 
     // meet front wall
   } else if (front_centre_sensor > 0) {
-
     robot->record = 0;
 
     // stop first
-    if (robot->currentSpeed > 0)
-      robot->direction = DOWN;
+    if (robot->currentSpeed > 0) robot->direction = DOWN;
 
-    //need to turn right
-    else if (right_sensor == 0){
+    // need to turn right
+    else if (right_sensor == 0) {
       robot->direction = RIGHT;
       robot->turnRight = 1;
     }

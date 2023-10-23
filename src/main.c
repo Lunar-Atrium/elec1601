@@ -47,11 +47,11 @@ int main(int argc, char *argv[]) {
 
   // SETUP MAZE
   struct Wall_collection *static_wall_head = NULL;
-  struct Wall_collection *dynamic_wall_head = NULL;
+  // struct Wall_collection *dynamic_wall_head = NULL;
   struct Wall_collection *walls = NULL;
-  my_custom_maze(&static_wall_head);
-  create_wall(&dynamic_wall_head, -1, (int[2]){230, 200}, (int[2]){330, 200},
-              (int[2]){330, 200}, 10, 0.05);
+  my_custom_maze(&walls);
+  // create_wall(&dynamic_wall_head, -1, (int[2]){230, 200}, (int[2]){330, 200},
+              // (int[2]){330, 200}, 10, 0.05);
 
   // simulation main loop
   while (!DONE) {
@@ -59,16 +59,16 @@ int main(int argc, char *argv[]) {
     SDL_RenderClear(renderer);
 
     // update
-    struct Wall_collection *drownWall = NULL;
-    
+    // struct Wall_collection *drownWall = NULL;
+
     robotUpdate(renderer, &robot);
-    free_walls(walls);
-    updateAllWalls(static_wall_head, renderer);
-    
-    if (robot.auto_mode == 1) 
-      drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 50, 0);
-    walls = merge_walls(static_wall_head, drownWall);
-    
+    updateAllWalls(walls, renderer);
+
+    // free_walls(walls);
+    // if (robot.auto_mode == 1)
+    //   drownWall = dynamicWallUpdate(renderer, dynamic_wall_head, 50, 0);
+    // walls = merge_walls(static_wall_head, drownWall);
+
     if (!exist_coordinate) {
       drawCoordinates(table, renderer);
     } else {
@@ -84,8 +84,7 @@ int main(int argc, char *argv[]) {
     robotMotorMove(&robot, crashed);
 
     // Check if robot reaches endpoint. and check sensor values
-    if (checkRobotReachedEnd(&robot, OVERALL_WINDOW_WIDTH - 20,
-                             OVERALL_WINDOW_HEIGHT / 2 - 190, 10, 100)) {
+    if (checkRobotReachedEnd(&robot, 0, 180, 10, 60)) { //Maze 5
       end_time = clock();
       end_linuxTimestamp = time(NULL);
       // msec = (end_time - start_time) * 1000 / CLOCKS_PER_SEC;
@@ -128,8 +127,8 @@ int main(int argc, char *argv[]) {
         // free memory and re-generate hashtable
         freeHashTable(table);
         table = createPathHashTable(TABLE_BUFFER);
-        //re-generate dynamic wall
-        dynamicWallUpdate(renderer, dynamic_wall_head, 60, 1);
+        // re-generate dynamic wall
+        // dynamicWallUpdate(renderer, dynamic_wall_head, 60, 1);
       }
       if (state[SDL_SCANCODE_RETURN]) {
         robot.auto_mode = 1;
@@ -162,125 +161,154 @@ int main(int argc, char *argv[]) {
 }
 
 void my_custom_maze(struct Wall_collection **head) {
-  int wall_keys = 0;
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 50,
-                        OVERALL_WINDOW_HEIGHT / 2 + 200, 10,
-                        OVERALL_WINDOW_HEIGHT / 2 - 200);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 150,
-                        OVERALL_WINDOW_HEIGHT / 2 + 200, 10,
-                        OVERALL_WINDOW_HEIGHT / 2 - 200);
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 200, OVERALL_WINDOW_HEIGHT / 2 + 100},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 50, OVERALL_WINDOW_HEIGHT / 2 + 200},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 200, OVERALL_WINDOW_HEIGHT / 2 + 100},
-      8, 0.005);
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 300, OVERALL_WINDOW_HEIGHT / 2 + 100},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 150, OVERALL_WINDOW_HEIGHT / 2 + 200},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 300, OVERALL_WINDOW_HEIGHT / 2 + 100},
-      8, 0.005);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 200,
-                        OVERALL_WINDOW_HEIGHT / 2 + 50, 10, 50);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 300,
-                        OVERALL_WINDOW_HEIGHT / 2 + 50, 10, 50);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 300,
-                        OVERALL_WINDOW_HEIGHT / 2 - 220, 10, 175);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 230,
-                        OVERALL_WINDOW_HEIGHT / 2 - 160, 10, 25);
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 200, OVERALL_WINDOW_HEIGHT / 2 + 50},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 80, OVERALL_WINDOW_HEIGHT / 2 - 135},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 200, OVERALL_WINDOW_HEIGHT / 2 + 50},
-      8, 0.005);
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 230, OVERALL_WINDOW_HEIGHT / 2 - 45},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 300, OVERALL_WINDOW_HEIGHT / 2 + 50},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 230, OVERALL_WINDOW_HEIGHT / 2 - 45},
-      8, 0.005);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 300,
-                        OVERALL_WINDOW_HEIGHT / 2 - 45, 70, 10);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 230,
-                        OVERALL_WINDOW_HEIGHT / 2 - 135, 150, 10);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 230,
-                        OVERALL_WINDOW_HEIGHT / 2 - 160, 180, 10);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 - 300,
-                        OVERALL_WINDOW_HEIGHT / 2 - 220, 330, 10);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 30,
-                        OVERALL_WINDOW_HEIGHT / 2 - 220, 10, 60);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 240,
-                        OVERALL_WINDOW_HEIGHT / 2 - 160,
-                        OVERALL_WINDOW_WIDTH / 2 - 240, 10);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 100,
-                        OVERALL_WINDOW_HEIGHT / 2 - 220,
-                        OVERALL_WINDOW_WIDTH / 2 - 100, 10);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 100,
-                        OVERALL_WINDOW_HEIGHT / 2 - 220, 10, 175);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 100,
-                        OVERALL_WINDOW_HEIGHT / 2 - 45, 50, 10);
-  insertAndSetFirstWall(head, ++wall_keys, OVERALL_WINDOW_WIDTH / 2 + 240,
-                        OVERALL_WINDOW_HEIGHT / 2 - 135, 70, 10);
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 240, OVERALL_WINDOW_HEIGHT / 2 - 160},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 240, OVERALL_WINDOW_HEIGHT / 2 - 135},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 125, OVERALL_WINDOW_HEIGHT / 2 - 150},
-      10, 0.005);
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 150, OVERALL_WINDOW_HEIGHT / 2 - 45},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 60, OVERALL_WINDOW_HEIGHT / 2 + 95},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 200, OVERALL_WINDOW_HEIGHT / 2 + 50},
-      10, 0.005);
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 10, OVERALL_WINDOW_HEIGHT / 2 + 215},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 310, OVERALL_WINDOW_HEIGHT / 2 - 135},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 310, OVERALL_WINDOW_HEIGHT / 2 + 150},
-      10, 0.005);
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 30, OVERALL_WINDOW_HEIGHT / 2 - 160},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 50, OVERALL_WINDOW_HEIGHT / 2 - 85},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 110, OVERALL_WINDOW_HEIGHT / 2 - 120},
-      8, 0.005);  // c1
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 70, OVERALL_WINDOW_HEIGHT / 2},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 60, OVERALL_WINDOW_HEIGHT / 2 + 95},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 130, OVERALL_WINDOW_HEIGHT / 2 + 50},
-      8, 0.005);  // c3
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 50, OVERALL_WINDOW_HEIGHT / 2 - 85},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 70, OVERALL_WINDOW_HEIGHT / 2},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 20, OVERALL_WINDOW_HEIGHT / 2 - 25},
-      8, 0.005);  // c5
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 50, OVERALL_WINDOW_HEIGHT / 2 - 160},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 40, OVERALL_WINDOW_HEIGHT / 2 - 85},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2, OVERALL_WINDOW_HEIGHT / 2 - 130}, 8,
-      0.005);  // c2
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 20, OVERALL_WINDOW_HEIGHT / 2 + 20},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 60, OVERALL_WINDOW_HEIGHT / 2 + 125},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 + 30, OVERALL_WINDOW_HEIGHT / 2 + 50},
-      8, 0.005);  // c4
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 40, OVERALL_WINDOW_HEIGHT / 2 - 85},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 20, OVERALL_WINDOW_HEIGHT / 2 + 20},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 130, OVERALL_WINDOW_HEIGHT / 2 - 25},
-      8, 0.005);  // c6
-  wall_keys = create_wall(
-      head, ++wall_keys,
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 60, OVERALL_WINDOW_HEIGHT / 2 + 125},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 10, OVERALL_WINDOW_HEIGHT / 2 + 215},
-      (int[2]){OVERALL_WINDOW_WIDTH / 2 - 100, OVERALL_WINDOW_HEIGHT / 2 + 155},
-      8, 0.005);  // c7
+  int name_index = 1;
+  insertAndSetFirstWall(head, name_index++, 0, 0, 10, 130);
+
+  insertAndSetFirstWall(head, name_index++, 80, 0, 10, 30);
+
+  insertAndSetFirstWall(head, name_index++, 80, 30, 30, 10);
+
+  insertAndSetFirstWall(head, name_index++, 0, 130, 110, 10);
+
+  int i, a, b, c, d, e, f, g, h, k, l, m;
+
+  double j;
+
+  a = 30;
+
+  b = 30;
+
+  c = 10;
+
+  d = 3;
+
+  e = 110;
+
+  f = 130;
+
+  g = b;
+
+  h = c;
+
+  k = d;
+
+  l = e;
+
+  m = 90;
+
+  for (i = 0; i < m; i++) {
+    j = i;
+
+    insertAndSetFirstWall(head, name_index++,
+
+                          (i * d) + e,
+
+                          a + b * sin(c * j * M_PI / 180),
+
+                          10, 10);
+
+    insertAndSetFirstWall(head, name_index++,
+
+                          (i * k) + l,
+
+                          f + g * sin(h * j * M_PI / 180),
+
+                          10, 10);
+  }
+
+  for (i = 0; i < 100; i++) {
+    j = i;
+
+    insertAndSetFirstWall(head, name_index++,
+
+                          // the most important bit is below.
+
+                          // increase the 20 for a tighter bend
+
+                          // descrease for a more meandering flow
+
+                          380 + 130 * sin(1.8 * j * M_PI / 180),
+
+                          // increase the 5 for a spacier curve
+
+                          (i * 2) + 130,
+
+                          10, 10);
+
+    insertAndSetFirstWall(head, name_index++,
+
+                          // the most important bit is below.
+
+                          // increase the 20 for a tighter bend
+
+                          // descrease for a more meandering flow
+
+                          380 + 230 * sin(1.8 * j * M_PI / 180),
+
+                          // increase the 5 for a spacier curve
+
+                          (i * 4) + 30,
+
+                          10, 10);
+  }
+
+  float aa, bb;
+
+  a = 200;
+
+  aa = 0.5;
+
+  bb = 1;
+
+  c = 180;
+
+  d = 1;
+
+  e = a + 100;
+
+  f = c;
+
+  m = 250;
+
+  for (i = 100; i < m; i++) {
+    insertAndSetFirstWall(head, name_index++, a + i * aa, c + i * bb, 10, 10);
+  }
+
+  insertAndSetFirstWall(head, name_index++, 330, 430, 60, 10);
+
+  m = 150;
+
+  for (i = 0; i < m; i++) {
+    insertAndSetFirstWall(head, name_index++, e + i * aa, f + i * bb, 10, 10);
+  }
+
+  insertAndSetFirstWall(head, name_index++, 150, 180, 150, 10);
+
+  e = a - 50;
+
+  aa = 0.25;
+
+  for (i = 0; i < m; i++) {
+    insertAndSetFirstWall(head, name_index++, e - i * aa, f + i * bb, 10, 10);
+  }
+
+  a = a + 50;
+
+  c = c + 100;
+
+  aa = 0.75;
+
+  for (i = 0; i < m; i++) {
+    insertAndSetFirstWall(head, name_index++, a - i * aa, c + i * bb, 10, 10);
+  }
+
+  insertAndSetFirstWall(head, name_index++, 40, 430, 100, 10);
+
+  insertAndSetFirstWall(head, name_index++, 40, 240, 10, 190);
+
+  insertAndSetFirstWall(head, name_index++, 110, 180, 10, 160);
+
+  insertAndSetFirstWall(head, name_index++, 0, 240, 40, 10);
+
+  insertAndSetFirstWall(head, name_index++, 0, 180, 110, 10);
 }
